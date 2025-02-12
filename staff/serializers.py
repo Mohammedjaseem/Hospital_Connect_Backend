@@ -27,3 +27,9 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         if data.get('dob') and data['dob'] > date.today():
             raise serializers.ValidationError({"dob": "Date of birth cannot be in the future."})
         return data
+class TeachingStaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffProfile
+        fields = [
+            'id','name','picture'
+        ]
