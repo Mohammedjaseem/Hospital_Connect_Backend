@@ -1,35 +1,19 @@
 from rest_framework import serializers
-from .models import StaffProfile
 from datetime import date
-
-# class StaffProfileSerializer(serializers.ModelSerializer):
-#     department_name = serializers.CharField(source='department.name', read_only=True)
-#     designation_name = serializers.CharField(source='designation.name', read_only=True)
-
-#     class Meta:
-#         model = StaffProfile
-#         fields = [
-#             'uuid', 'is_active', 'user', 'name', 'gender', 'dob', 'mobile',
-#             'department', 'department_name', 'designation', 'designation_name',
-#             'is_verified', 'is_teaching_staff', 'address','picture',
-#             'blood_group','emergency_contact'
-#         ]
-#         read_only_fields = ('uuid',)
-#     def validate(self, data):
-#         if data.get('dob') and data['dob'] > date.today():
-#             raise serializers.ValidationError({"dob": "Date of birth cannot be in the future."})
-#         return data
+from .models import StaffProfile
 
 class StaffProfileSerializer(serializers.ModelSerializer):
     department_name = serializers.SerializerMethodField()
     designation_name = serializers.SerializerMethodField()
+    blood_group_display = serializers.CharField(source="get_blood_group_display", read_only=True)
+    gender_display = serializers.CharField(source="get_gender_display", read_only=True)
 
     class Meta:
         model = StaffProfile
         fields = [
-            'id', 'is_active', 'user', 'name', 'gender', 'dob', 'mobile',
-            'department', 'designation', 'department_name','designation_name','is_verified', 'is_hosteller', 'address', 'picture',
-            'blood_group', 'emergency_contact'
+            'id', 'is_active', 'user', 'name', 'gender', 'gender_display', 'dob', 'mobile',
+            'department', 'designation', 'department_name', 'designation_name', 'is_verified',
+            'is_hosteller', 'address', 'picture', 'blood_group', 'blood_group_display', 'emergency_contact'
         ]
         read_only_fields = ('uuid',)
 
@@ -43,10 +27,3 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         if data.get('dob') and data['dob'] > date.today():
             raise serializers.ValidationError({"dob": "Date of birth cannot be in the future."})
         return data
-
-class TeachingStaffSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StaffProfile
-        fields = [
-            'id','name','picture'
-        ]
