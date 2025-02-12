@@ -1,0 +1,79 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+.env
+*.venv
+venv/
+ENV/
+env/
+*.egg-info/
+
+# Django
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# PostgreSQL
+*.pgsql
+*.sql
+pg_dump*
+
+# Celery
+celerybeat-schedule
+*.celerybeat
+
+
+
+# Redis
+dump.rdb
+appendonly.aof
+
+# Virtual environments
+venv/
+.venv/
+.connectvenv/
+connectvenv/
+
+
+# IDEs and editors
+.idea/
+*.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Pycharm
+*.idea/
+
+# Node.js (if applicable)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Build files
+build/
+dist/
+*.egg
+
+note.txt
