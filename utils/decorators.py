@@ -18,7 +18,7 @@ def verify_tenant_user(is_hospital_admin=False):
                     status=status.HTTP_403_FORBIDDEN
                 )
             # Check if admin access is required
-            if is_hospital_admin and not request.user.is_school_admin:
+            if not request.user.is_school_admin:
                 return Response(
                     {'error': 'You do not have permission to do this', 'status': False},
                     status=status.HTTP_403_FORBIDDEN
