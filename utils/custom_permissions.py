@@ -11,10 +11,10 @@ class IsTenantUser(BasePermission):
         return True
 
 
-class IsSchoolAdmin(BasePermission):
+class IsHospitalAdmin(BasePermission):
     """
     Permission to check if the user is a school admin.
     """
 
     def has_permission(self, request, view):
-        return request.user.is_school_admin
+        return request.user.is_hospital_admin

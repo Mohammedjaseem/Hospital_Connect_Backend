@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes, throttle_cla
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser, OTP
-from .serializers import RegisterUserSerializer
+from .serializers import RegisterUserSerializer, CustomUserSerializer
 from .tasks import send_otp_to_email
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from utils.validate_required_fields import validate_required_fields
 import logging
 from django.db import transaction
-# from staff.models import StaffProfile
+from staff.models import StaffProfile
 from django_tenants.utils import schema_context
 # from staff.serializers import StaffProfileSerializer
 # from students.serializers import StudentProfileSerializer
@@ -130,7 +130,7 @@ def resend_otp(request):
 @api_view(['POST'])
 def login(request):
     """
-    Authenticate a user and return JWT tokens via HTTP-only cookies if successful.
+    Authenticate a user and return JWT tokens in the response body.
     """
     # Validate required fields
     validation_response = validate_required_fields(request.data, ['email', 'password'])
@@ -146,6 +146,8 @@ def login(request):
         user = authenticate(email=email, password=password)
         if not user:
             return Response({'error': 'Invalid email or password', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Uncomment this if organization-based authentication is needed
         # if user.org.id != org:
         #     return Response({'error': 'You do not belong to this hospital', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -164,28 +166,23 @@ def login(request):
             }, status=status.HTTP_200_OK)
 
         # Initialize response variables
-        # staff_profile, student_profile, enrolled_student = None, None, None
-        # is_profile_created = False
+        staff_profile = None
+        is_profile_created = False
 
         # Handle tenant-specific data
-        # with schema_context(user.org.client.schema_name):  # Switch to tenant schema
-        #     Fetch student or staff profile
-        #     student_profile = StudentProfile.objects.filter(user=user).first()
-        #     if student_profile:
-        #         # Fetch active enrollment for the student
-        #         enrolled_student = student_profile.enrollments.filter(is_active=True).first()
-        #     else:
-        #         # Fetch staff profile with related department and designation
-        #         staff_profile = StaffProfile.objects.filter(user=user).select_related('department', 'designation').first()
-        #         is_profile_created = bool(staff_profile)
+        with schema_context(user.org.client.schema_name):  # Switch to tenant schema
+            # Fetch student or staff profile
+            # staff_profile = StaffProfile.objects.filter(user=user).first()
+            if staff_profile:
+                is_profile_created = True
 
         # Generate JWT tokens
         token = RefreshToken.for_user(user)
         access_token = str(token.access_token)
         refresh_token = str(token)
 
-        # Serialize user details
-        # user_serializer = CustomUserSerializer(user)
+        # # Serialize user details
+        user_serializer = CustomUserSerializer(user)
         # staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
         # student_profile_serializer = StudentLoginSerializer(student_profile) if student_profile else None
         # enrolled_student_data = {
@@ -203,64 +200,65 @@ def login(request):
         # else:
         #     student_profile_data = None
 
-        # Create HTTP response
-        response = Response({
+        # Return tokens and user profile data in response body
+        return Response({
             'message': "Login Successful",
             'status': True,
-            'user': {user.email, user.name},
+            'user': user_serializer.data,
+            'is_profile_created': is_profile_created,
             # 'staff_profile': staff_profile_serializer.data if staff_profile else None,
-            # 'student_profile': student_profile_data
+            # 'student_profile': student_profile_data,
+            'access': access_token,
+            'refresh': refresh_token
         }, status=status.HTTP_200_OK)
-
-        # Set cookies for tokens (HTTP-only and Secure for production)
-        access_token_expiry = datetime.utcnow() + timedelta(minutes=5)  # Adjust expiry as needed
-        refresh_token_expiry = datetime.utcnow() + timedelta(days=7)
-        
-        response.set_cookie(
-            key='access_token', value=access_token, httponly=True, secure=True, samesite='None', expires=http_date(access_token_expiry.timestamp())
-        )
-        response.set_cookie(
-            key='refresh_token', value=refresh_token, httponly=True, secure=True, samesite='None', expires=http_date(refresh_token_expiry.timestamp())
-        )
-        
-        return response
 
     except Exception as e:
         logger.error(f"Error during user login: {e}")
-
-        return handle_exception(e)
+        return Response({'error': 'An unexpected error occurred', 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 def refresh_token(request):
     '''
-    Refresh the access token using the refresh token stored in the HTTP-only cookie.
+    Refresh the access token using the refresh token sent in the request body.
     '''
     try:
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.data.get('refresh_token')
         if not refresh_token:
             return Response({'error': 'Refresh token not provided.', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Generate new access token
         token = RefreshToken(refresh_token)
         access_token = str(token.access_token)
-        
-        # Create HTTP response
-        response = Response({
+
+        return Response({
             'message': "Token refreshed successfully",
             'status': True,
+            'access': access_token
         }, status=status.HTTP_200_OK)
-
-        # Set new access token in cookies
-        access_token_expiry = datetime.utcnow() + timedelta(minutes=5)
-        response.set_cookie(
-            key='access_token', value=access_token, httponly=True, secure=True, samesite='None', expires=http_date(access_token_expiry.timestamp())
-        )
-        
-        return response
 
     except Exception as e:
         logger.error(f"Error refreshing token: {e}")
+        return Response({'error': 'Invalid or expired refresh token.', 'status': False}, status=status.HTTP_401_UNAUTHORIZED)
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    '''
+    Logout the user by blacklisting the refresh token.
+    '''
+    validation_response = validate_required_fields(request.data, ['refresh'])
+    if validation_response:
+        return validation_response
+    try:
+        refresh_token = request.data.get('refresh')
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({'message': 'Logout successful', 'status': True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error during logout: {e}")
         return Response({'error': 'An unexpected error occurred. Please try again later.', 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

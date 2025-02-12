@@ -35,3 +35,34 @@ class RegisterUserSerializer(ModelSerializer):
     @staticmethod
     def generate_otp():
         return random.randint(1000, 9999)
+    
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organizations
+        fields = ['id', 'name']  # Adjust fields as per your `Organizations` model
+
+
+class UserTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserType
+        fields = ['id', 'name']  # Adjust fields as per your `UserType` model
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    org_details = OrganizationSerializer(source='org', read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id',
+            'uuid',
+            'email',
+            'user_type',
+            'is_verified',
+            'is_active',
+            'is_staff',
+            'is_hospital_admin',
+            'org',
+            'org_details',
+        ]
+        read_only_fields = ['uuid', 'is_verified', 'is_active', 'is_staff', 'is_hospital_admin']
