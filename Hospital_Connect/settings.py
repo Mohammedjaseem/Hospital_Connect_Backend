@@ -200,7 +200,7 @@ SIMPLE_JWT = {
     "AUTH_COOKIE": "access_token",
     "AUTH_COOKIE_HTTPONLY": True,  # Prevents JavaScript access
     "AUTH_COOKIE_SECURE": False,  # ✅ Set to False for local development
-    "AUTH_COOKIE_SAMESITE": "Lax",  # ✅ Prevent cross-site issues
+    "AUTH_COOKIE_SAMESITE": "None",  # ✅ Prevent cross-site issues
 }
 
 
@@ -237,7 +237,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 CSRF_COOKIE_HTTPONLY = False # ✅ Allow CSRF cookie to be accessed by JavaScript
 CSRF_COOKIE_SECURE = False  # ✅ Ensure CSRF cookie works in local development
 CSRF_USE_SESSIONS = False
-CSRF_COOKIE_SAMESITE = "Lax"  # ✅ Match AUTH_COOKIE_SAMESITE
+CSRF_COOKIE_SAMESITE = "None"  # ✅ Match AUTH_COOKIE_SAMESITE
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]  # ✅ Trusted frontend origin
 
 
@@ -251,7 +251,7 @@ CORS_ALLOWED_ORIGINS = [
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False  # ✅ Match AUTH_COOKIE_SECURE
-SESSION_COOKIE_SAMESITE = "Lax"  # ✅ Match CSRF and AUTH_COOKIE_SAMESITE
+SESSION_COOKIE_SAMESITE = "None"  # ✅ Match CSRF and AUTH_COOKIE_SAMESITE
 
 # # Ensure authentication cookies are also secure
 # AUTH_COOKIE_HTTPONLY = True
