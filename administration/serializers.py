@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Departments, Designations, DepartmentInchargeAndHod,ClassRoom
+from .models import Departments, Designations, DepartmentInchargeAndHod
 
 class DepartmentSerializer(serializers.ModelSerializer):
     
