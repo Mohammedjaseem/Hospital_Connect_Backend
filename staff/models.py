@@ -19,7 +19,7 @@ class StaffProfile(models.Model,ImageCompressorMixin):
     department = models.ForeignKey("administration.Departments", on_delete=models.SET_NULL, null=True, blank=True)
     designation = models.ForeignKey("administration.Designations", on_delete=models.SET_NULL, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
-    is_teaching_staff = models.BooleanField(default=False)
+    is_hosteller = models.BooleanField(default=False)
     picture = models.ImageField(storage=TenantMediaStorage(),upload_to="users/picture", blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     blood_group = models.CharField(max_length=3, choices=BloodGroupChoices.choices, blank=True, null=True)

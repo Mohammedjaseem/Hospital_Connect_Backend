@@ -28,7 +28,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         model = StaffProfile
         fields = [
             'id', 'is_active', 'user', 'name', 'gender', 'dob', 'mobile',
-            'department', 'designation', 'department_name','designation_name','is_verified', 'is_teaching_staff', 'address', 'picture',
+            'department', 'designation', 'department_name','designation_name','is_verified', 'is_hosteller', 'address', 'picture',
             'blood_group', 'emergency_contact'
         ]
         read_only_fields = ('uuid',)
