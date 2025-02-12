@@ -11,6 +11,7 @@ class StaffProfile(models.Model,ImageCompressorMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     is_active = models.BooleanField(default=True)
     user = models.OneToOneField("custom_users.CustomUser", on_delete=models.CASCADE, related_name="staff_profile")
+    emp_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=250)
     gender = models.CharField(max_length=10, choices=GenderChoices.choices, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
