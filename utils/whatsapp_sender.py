@@ -41,4 +41,10 @@ def send_whatsapp_message(request, passing_data, type, sent_to):
                 print(f"Error updating bill: {e}")
             return True
         else:
-            return response.text
+            return {
+                "status": "error",
+                "message": "Failed to send message",
+                "details": response.text,
+                "app_id": app_id
+            
+            }
