@@ -5,7 +5,7 @@ from connect_bills.models import WhatsAppBill
 
 
 @csrf_exempt
-def send_whatsapp_message(request, passing_data, type, sent_to, org):
+def send_whatsapp_message(request, passing_data, type, sent_to):
     
         #token fetch
         app_id = os.getenv("WA_APP_ID")
@@ -41,4 +41,9 @@ def send_whatsapp_message(request, passing_data, type, sent_to, org):
                 print(f"Error updating bill: {e}")
             return True
         else:
-            return response.text
+            print("response.text: ",response.text)
+            return {
+                "status": "error",
+                "message": "Failed to send message",
+                "details": response.text,
+            }
