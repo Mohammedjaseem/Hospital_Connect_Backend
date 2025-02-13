@@ -353,7 +353,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 upload = s3.upload_file(local_qr_code_path, bucket_name, s3_directory)
 
                 # Set the ACL to 'public-read' to make the object publicly accessible
-                s3.put_object_acl(Bucket=bucket_name, Key=s3_directory, ACL='public-read')
+                s3.put_object_acl(Bucket=bucket_name, Key=s3_directory)
 
                 # Wait for the object to exist before printing success message
                 s3.get_waiter('object_exists').wait(Bucket=bucket_name, Key=s3_directory)
