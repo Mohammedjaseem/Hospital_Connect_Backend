@@ -5,7 +5,13 @@ from django.utils.translation import gettext_lazy as _
 
 class Hostel(models.Model):
     name = models.CharField(max_length=100)
-    incharge = models.ForeignKey("staff.StaffProfile", verbose_name=_("Incharge"), on_delete=models.CASCADE, null=True)
+    incharge = models.ForeignKey(
+        "staff.StaffProfile",
+        verbose_name=_("Incharge"),
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="managed_hostel",  # Explicit related_name to avoid clash
+    )
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     remarks = models.TextField(null=True, blank=True)
