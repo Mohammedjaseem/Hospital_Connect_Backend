@@ -32,6 +32,7 @@ class StaffProfile(models.Model, ImageCompressorMixin):
     )
     is_verified = models.BooleanField(default=False)
     is_hosteller = models.BooleanField(default=False)
+ 
 
     # Store images in tenant-specific S3 folders
     picture = models.ImageField(
