@@ -382,7 +382,7 @@ def user_retrival(request):
 
         # Serialize user details
         user_serializer = CustomUserSerializer(user)
-        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
+        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}).data if staff_profile else None
         # student_profile_serializer = StudentLoginSerializer(student_profile) if student_profile else None
         # enrolled_student_data = {
         #     'class': enrolled_student.classs if enrolled_student else None,
@@ -401,11 +401,13 @@ def user_retrival(request):
         #     student_profile_data = None
 
         # Return response
+        if staff_profile_serializer:
+            staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
         return Response({
             'message': "User retrieved successfully",
             'is_profile_created': is_profile_created,
             'user': user_serializer.data,
-            'staff_profile': staff_profile_serializer.data if staff_profile else None,
+            'staff_profile': staff_profile_serializer if staff_profile else None,
             'is_hostel_incharge': is_hostel_incharge,
             # 'student_profile': student_profile_data,
             'status': True
