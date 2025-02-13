@@ -397,6 +397,17 @@ def HostelStaffGatePassApprove(request, token, decision):
                     "language": {"code": "en"},
                     "components": [
                         {
+                            "type": "header",
+                            "parameters": [
+                                {
+                                    "type": "image",
+                                    "image": {
+                                        "link": f"{gate_pass.qr_code_url}"
+                                    }
+                                },
+                            ]
+                        },
+                        {
                             "type": "body",
                             "parameters": [
                                 {
