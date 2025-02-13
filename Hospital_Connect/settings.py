@@ -268,10 +268,7 @@ CORS_ALLOWED_ORIGINS = [
 # SECURE_BROWSER_XSS_FILTER = True  # Enable XSS protection
 
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-
-DEFAULT_FILE_STORAGE = 'path.to.TenantS3Boto3Storage'
 
 
 
@@ -279,13 +276,13 @@ DEFAULT_FILE_STORAGE = 'path.to.TenantS3Boto3Storage'
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = 'ap-south-1'
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-AWS_DEFAULT_ACL = 'public-read'
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 
+# Static and Media Files
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'  # Keep static files local
+DEFAULT_FILE_STORAGE = 'utils.multis3.TenantMediaStorage'
 
-STATIC_URL = 'static/'
-
-
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
