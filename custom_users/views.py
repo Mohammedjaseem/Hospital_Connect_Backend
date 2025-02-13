@@ -13,7 +13,7 @@ import logging
 from django.db import transaction
 from staff.models import StaffProfile
 from django_tenants.utils import schema_context
-# from staff.serializers import StaffProfileSerializer
+from staff.serializers import StaffProfileSerializer
 # from students.serializers import StudentProfileSerializer
 from utils.handle_exception import handle_exception
 from app.models import Organizations
@@ -148,8 +148,8 @@ def login(request):
             return Response({'error': 'Invalid email or password', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
         # Uncomment this if organization-based authentication is needed
-        # if user.org.id != org:
-        #     return Response({'error': 'You do not belong to this hospital', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        if user.org.id != org:
+            return Response({'error': 'You do not belong to this hospital', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
         # Handle unverified user
         if not user.is_verified:
@@ -172,7 +172,7 @@ def login(request):
         # Handle tenant-specific data
         with schema_context(user.org.client.schema_name):  # Switch to tenant schema
             # Fetch student or staff profile
-            # staff_profile = StaffProfile.objects.filter(user=user).first()
+            staff_profile = StaffProfile.objects.filter(user=user).first()
             if staff_profile:
                 is_profile_created = True
 
@@ -183,7 +183,7 @@ def login(request):
 
         # # Serialize user details
         user_serializer = CustomUserSerializer(user)
-        # staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
+        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
         # student_profile_serializer = StudentLoginSerializer(student_profile) if student_profile else None
         # enrolled_student_data = {
         #     'class': enrolled_student.classs if enrolled_student else None,

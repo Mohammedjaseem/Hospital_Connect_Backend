@@ -1,84 +1,125 @@
-from django.db import models
+class AcademicYearChoices:
+    CHOICES = [
+        ("2024-2025", "2024-2025"),
+        ("2025-2026", "2025-2026"),
+        ("2026-2027", "2026-2027"),
+        ("2027-2028", "2027-2028"),
+    ]
 
-class AcademicYearChoices(models.IntegerChoices):
-    YEAR_2024_2025 = 1, "2024-2025"
-    YEAR_2025_2026 = 2, "2025-2026"
-    YEAR_2026_2027 = 3, "2026-2027"
-    YEAR_2027_2028 = 4, "2027-2028"
 
-class DivisionChoices(models.IntegerChoices):
-    A = 1, "A"
-    B = 2, "B"
-    C = 3, "C"
-    D = 4, "D"
-    E = 5, "E"
-    F = 6, "F"
-    G = 7, "G"
-    H = 8, "H"
-    I = 9, "I"
-    J = 10, "J"
-    K = 11, "K"
-    L = 12, "L"
+class DivisionChoices:
+    CHOICES = [
+        ("A", "A"),
+        ("B", "B"),
+        ("C", "C"),
+        ("D", "D"),
+        ("E", "E"),
+        ("F", "F"),
+        ("G", "G"),
+        ("H", "H"),
+        ("I", "I"),
+        ("J", "J"),
+        ("K", "K"),
+        ("L", "L"),
+    ]
 
-class SectionChoices(models.IntegerChoices):
-    KG = 1, "KG"
-    LP = 2, "LP"
-    UP = 3, "UP"
-    HS = 4, "HS"
-    HSS = 5, "HSS"
 
-class ClassChoices(models.IntegerChoices):
-    CLASS_1 = 1, "1"
-    CLASS_2 = 2, "2"
-    CLASS_3 = 3, "3"
-    CLASS_4 = 4, "4"
-    CLASS_5 = 5, "5"
-    CLASS_6 = 6, "6"
-    CLASS_7 = 7, "7"
-    CLASS_8 = 8, "8"
-    CLASS_9 = 9, "9"
-    CLASS_10 = 10, "10"
-    CLASS_PLUS1 = 11, "+1"
-    CLASS_PLUS2 = 12, "+2"
+class SectionChoices:
+    CHOICES = [
+        ("KG", "KG"),
+        ("LP", "LP"),
+        ("UP", "UP"),
+        ("HS", "HS"),
+        ("HSS", "HSS"),
+    ]
 
-class DepartmentChoices(models.IntegerChoices):
-    SCIENCE = 1, "Science"
-    COMMERCE = 2, "Commerce"
-    HUMANITIES = 3, "Humanities"
+class ClassChoices:
+    CHOICES = [
+        ("1", "1"),
+        ("2", "2"),
+        ("3", "3"),
+        ("4", "4"),
+        ("5", "5"),
+        ("6", "6"),
+        ("7", "7"),
+        ("8", "8"),
+        ("9", "9"),
+        ("10", "10"),
+        ("+1", "+1"),
+        ("+2", "+2"),
+    ]
 
-class BloodGroupChoices(models.IntegerChoices):
-    A_POS = 1, "A+"
-    A_NEG = 2, "A-"
-    B_POS = 3, "B+"
-    B_NEG = 4, "B-"
-    AB_POS = 5, "AB+"
-    AB_NEG = 6, "AB-"
-    O_POS = 7, "O+"
-    O_NEG = 8, "O-"
+class DepartmentChoices:
+    CHOICES = [
+        ("Science", "Science"),
+        ("Commerce", "Commerce"),
+        ("Humanities", "Humanities"),
+    ]
 
-class GenderChoices(models.IntegerChoices):
-    MALE = 1, "Male"
-    FEMALE = 2, "Female"
-    OTHER = 3, "Other"
 
-class PaymentTypeChoices(models.IntegerChoices):
-    ONLINE = 1, "Online"
-    OFFLINE = 2, "Offline"
-    CASH = 3, "Cash"
-    CHEQUE = 4, "Cheque"
-    RTGS = 5, "RTGS"
-    DD = 6, "DD"
-    BANK_TRANSFER = 7, "Bank Transfer"
-    NEFT = 8, "NEFT"
-    UPI = 9, "UPI"
-    IMPS = 10, "IMPS"
-    CARD = 11, "Card"
-    POS = 12, "POS"
+class BloodGroupChoices:
+    CHOICES = [
+        ("A+", "A+"),
+        ("A-", "A-"),
+        ("B+", "B+"),
+        ("B-", "B-"),
+        ("AB+", "AB+"),
+        ("AB-", "AB-"),
+        ("O+", "O+"),
+        ("O-", "O-"),
+    ]
 
-# Helper function to get human-readable values from integer choices
-def get_choice_label(choices, value):
-    """Returns the label for a given integer choice."""
-    return dict(choices.choices).get(value, "Unknown")
+class GenderChoices:
+    CHOICES = [
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    ]
 
-# Example Usage:
-# print(get_choice_label(BloodGroupChoices, 1))  # Output: "A+"
+
+class SubjectChoices:
+    CHOICES = [
+        ("English", "English"),
+        ("Maths", "Mathematics"),
+        ("Basic Science", "Basic Science"),
+        ("Social Studies", "Social Studies"),
+        ("Hindi", "Hindi"),
+        ("Malayalam", "Malayalam"),
+        ("Arabic", "Arabic"),
+        ("Physics", "Physics"),
+        ("Chemistry", "Chemistry"),
+        ("Biology", "Biology"),
+        ("Geography", "Geography"),
+        ("History", "History"),
+        ("IT", "Information Technology"),
+        ("Business Studies", "Business Studies"),
+        ("First Language Paper 1", "First Language Paper 1"),
+        ("First Language Paper 2", "First Language Paper 2"),
+        ("EVS", "Environmental Studies"),
+        ("GK", "General Knowledge"),
+        ("PT", "Physical Training"),
+
+        #Modern Subjects
+        ("MS", "Modern Studies"),
+        ("Library", "Library"),
+        ("NMMS", "NMMS"),
+        ("WORKNEXPERIENCE", "Work Experience"),
+    ]
+
+class PaymentTypeChoices:
+    CHOICES = [
+        ("Online", "Online"),
+        ("Offline", "Offline"),
+        ("Cash", "Cash"),
+        ("Cheque", "Cheque"),
+        ("RTGS", "RTGS"),
+        ("DD", "DD"),
+        ("Bank Transfer", "Bank Transfer"),
+        ("NEFT", "NEFT"),
+        ("UPI", "UPI"),
+        ("IMPS", "IMPS"),
+        ("Card","Card"),
+        ("POS","POS"),
+    ]
+
+
