@@ -125,12 +125,33 @@ def apply_staff_hostel_gate_pass(request):
                             {"type": "text", "text": check_out_time},
                             {"type": "text", "text": return_date},
                             {"type": "text", "text": check_in_time},
-                            {"type": "text", "text": str(total_out_duration)},
+                            {"type": "text", "text": total_out_duration},
                             {"type": "text", "text": purpose},
-                            {"type": "button", "index": "0", "sub_type": "url", "parameters": [{"type": "text", "text": str(gate_pass.pass_token)}]},
-                            {"type": "button", "index": "1", "sub_type": "url", "parameters": [{"type": "text", "text": str(gate_pass.pass_token)}]}
                         ]
-                    }
+                    },
+                    
+                        {
+                            "type": "button",
+                            "index": "0",
+                            "sub_type": "url",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": str(gate_pass.pass_token)
+                                },
+                            ]
+                        },
+                        {
+                            "type": "button",
+                            "index": "1",
+                            "sub_type": "url",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": str(gate_pass.pass_token)
+                                },
+                            ]
+                        },
                 ]
             }
         }
