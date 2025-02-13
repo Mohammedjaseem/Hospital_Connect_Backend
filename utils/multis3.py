@@ -8,29 +8,21 @@ class TenantMediaStorage(S3Boto3Storage):
 
     def _save(self, name, content):
         """
-        Override the _save method to include a tenant-specific directory
+        Override the _save method to include tenant-specific directory
         and rename the file to a UUID-based file name.
         """
-        if not name:
-            print("name is not set")
-            raise ValueError("File name is not set. Ensure 'upload_to' is correctly defined in the model.")
-        print(name)
-
-
         # Get the current tenant schema name
         tenant_name = self.get_current_tenant_name()
-        if not tenant_name:
-            tenant_name = "default_tenant"  # Fallback to default tenant
 
-        # Extract the file extension safely
-        ext = os.path.splitext(name)[1] if '.' in name else ''
-
-        # Generate a UUID-based filename
+        # Extract the file extension
+        ext = os.path.splitext(name)[1]
+        # Generate a UUID-based file name
         uuid_name = f"{uuid.uuid4()}{ext}"
 
-        # Ensure the name is not empty before using os.path.dirname
-        upload_subdirectory = os.path.dirname(name) if name else ''
-        name = os.path.join(self.location, tenant_name, upload_subdirectory, uuid_name).replace("\\", "/")
+        # Construct tenant-specific file path
+        # name already contains 'users/picture' from the model's upload_to field
+        upload_subdirectory = os.path.dirname(name)  # Extract upload_to path
+        name = os.path.join(self.location, tenant_name, upload_subdirectory, uuid_name)
 
         return super()._save(name, content)
 

@@ -285,3 +285,8 @@ STATIC_URL = 'static/'
 
 
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+
+DEFAULT_FILE_STORAGE = 'path.to.TenantS3Boto3Storage'

@@ -5,21 +5,9 @@ from django.utils.safestring import mark_safe
 from datetime import date
 from utils.image_compressor import ImageCompressorMixin
 from utils.multis3 import TenantMediaStorage
-from utils.choices import GenderChoices, BloodGroupChoices
-from django.db import connection
+from utils.choices import GenderChoices,BloodGroupChoices
 
-def tenant_media_upload_path(instance, filename):
-    """
-    Generate a dynamic upload path based on the tenant schema.
-    Ensures files are stored per tenant in a structured format.
-    """
-    tenant_name = getattr(connection, 'schema_name', 'default_tenant')
-    ext = filename.split('.')[-1] if '.' in filename else ''
-    unique_filename = f"{uuid.uuid4()}.{ext}" if ext else str(uuid.uuid4())
-
-    return f"media/{tenant_name}/users/picture/{unique_filename}"
-
-class StaffProfile(models.Model, ImageCompressorMixin):
+class StaffProfile(models.Model,ImageCompressorMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     is_active = models.BooleanField(default=True)
     user = models.OneToOneField("custom_users.CustomUser", on_delete=models.CASCADE, related_name="staff_profile")
@@ -32,10 +20,7 @@ class StaffProfile(models.Model, ImageCompressorMixin):
     designation = models.ForeignKey("administration.Designations", on_delete=models.SET_NULL, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
     is_hosteller = models.BooleanField(default=False)
-    
-    # ✅ Fixed `upload_to` for dynamic tenant storage
-    picture = models.ImageField(storage=TenantMediaStorage(), upload_to=tenant_media_upload_path, blank=True, null=True)
-
+    picture = models.ImageField(storage=TenantMediaStorage(),upload_to="users/picture", blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     blood_group = models.CharField(max_length=3, choices=BloodGroupChoices.choices, blank=True, null=True)
     emergency_contact = models.CharField(max_length=15, blank=True, null=True)
@@ -49,10 +34,7 @@ class StaffProfile(models.Model, ImageCompressorMixin):
         return "https://cdn.vectorstock.com/i/preview-1x/82/99/no-image-available-like-missing-picture-vector-43938299.jpg"
 
     def profile_pic(self):
-        try:
-            img_url = self.picture.url if self.picture else self.get_default_picture_url()
-        except ValueError:  # Handle missing file reference
-            img_url = self.get_default_picture_url()
+        img_url = self.picture.url if self.picture else self.get_default_picture_url()
         return mark_safe(f'<img src="{img_url}" width="80" height="80" style="border-radius: 15px;" />')
 
     def calculate_age(self):
@@ -61,11 +43,24 @@ class StaffProfile(models.Model, ImageCompressorMixin):
             return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
         return None
 
+
     def save(self, *args, **kwargs):
         if self.picture:
-            self.compress_image()
+            self.compress_image()  
         super().save(*args, **kwargs)
 
     @property
     def age(self):
         return self.calculate_age()
+    
+# # class StudentEnrollment(models.Model):
+# #     student = models.ForeignKey('students.StudentProfile', on_delete=models.SET_NULL, related_name='enrollments')
+# #     classroom = models.ForeignKey('administration.ClassRoom', on_delete=models.SET_NULL, related_name='enrollments')
+# #     roll_number = models.PositiveIntegerField(null=True,blank=True)  # Roll number for the student in this context
+# #     is_active = models.BooleanField(default=True, db_index=True)  # Mark the current enrollment as active
+# #     created_at = models.DateTimeField(auto_now_add=True)
+# #     updated_at = models.DateTimeField(auto_now=True)
+# #     def __str__(self):
+# #         return f"{self.student.name} - {self.classroom.name} ({self.academic_year.name})"
+
+    
