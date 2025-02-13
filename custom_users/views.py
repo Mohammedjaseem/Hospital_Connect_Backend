@@ -277,3 +277,127 @@ def home(request):
 
     # Prepare the response message
     return Response({'message': f'Welcome {current_user} to {current_tenant} School Connect', 'status': True}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def forgot_password(request):
+    """
+    Handle forgot password functionality by sending an OTP to the user's email.
+    """
+    
+    validation_response = validate_required_fields(request.data, ['email'])
+    if validation_response:
+        return validation_response
+    
+    email = request.data.get('email')
+
+    try:
+        user = CustomUser.objects.filter(email=email).first()
+        if not user:
+            return Response({'error': 'User with this email does not exist', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp = RegisterUserSerializer.generate_otp()
+        otp_instance = OTP.objects.create(user=user)
+        otp_instance.set_otp(str(otp))
+        otp_instance.save()
+        send_otp_to_email.delay(user.email, otp,user.name, user.org.name)  # Send OTP to user's email using celery
+        return Response({'message': 'OTP sent successfully','uuid':user.uuid,'status': True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error during forgot password process: {e}")
+        return Response({'error': 'An unexpected error occurred. Please try again later.', 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+def reset_password(request):
+    '''
+    Reset password using OTP sent to the user's email. 
+    '''
+    
+    validation_response = validate_required_fields(request.data, ['uuid', 'password', 'confirm_password', 'otp'])
+    if validation_response:
+        return validation_response
+    
+    uuid = request.data.get('uuid')
+    password = request.data.get('password')
+    confirm_password = request.data.get('confirm_password')
+    otp = request.data.get('otp')
+
+    if password != confirm_password:
+        return Response({'error': 'Passwords do not match', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+    if len(password) < 6:
+        return Response({'error': 'Password must be at least 6 characters long', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = CustomUser.objects.filter(uuid=uuid).first()
+        if not user:
+            return Response({'error': 'User does not exist', 'status': False}, status=status.HTTP_404_NOT_FOUND)
+        
+        otp_instance = OTP.objects.filter(user=user).order_by('-created_at').first()
+        if not otp_instance:
+            return Response({'error': 'OTP not found', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_instance.is_expired():
+            return Response({'error': 'OTP has expired', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        if not otp_instance.verify_otp(otp):
+            return Response({'error': 'Invalid OTP', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        if not otp_instance.is_verified:
+            return Response({'error': 'OTP not verified', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(password)
+        user.save()
+        otp_instance.delete()
+        return Response({'message': 'Password reset successfully', 'status': True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error resetting password: {e}")
+        return Response({'error': 'An unexpected error occurred. Please try again later.', 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_retrival(request):
+    """
+    Retrieve user details including staff or student profile for the authenticated user.
+    """
+    try:
+        user = request.user
+
+        # Initialize response variables
+        staff_profile, student_profile, enrolled_student = None, None, None
+        is_profile_created = False
+
+        # Handle tenant-specific data
+        with schema_context(user.org.client.schema_name):
+            # Fetch staff profile with related department and designation
+            staff_profile = StaffProfile.objects.filter(user=user).select_related('department', 'designation').first()
+            is_profile_created = bool(staff_profile)
+
+        # Serialize user details
+        user_serializer = CustomUserSerializer(user)
+        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
+        # student_profile_serializer = StudentLoginSerializer(student_profile) if student_profile else None
+        # enrolled_student_data = {
+        #     'class': enrolled_student.classs if enrolled_student else None,
+        #     'division': enrolled_student.division if enrolled_student else None,
+        #     'academic_year': enrolled_student.academic_year if enrolled_student else None,
+        #     # 'classroom': enrolled_student.classroom if enrolled_student else None
+        # } if enrolled_student else None
+
+        # Merge student profile data and enrollment data
+        # if student_profile_serializer:
+        #     student_profile_data = {
+        #         **student_profile_serializer.data,
+        #         **(enrolled_student_data or {})
+        #     }
+        # else:
+        #     student_profile_data = None
+
+        # Return response
+        return Response({
+            'message': "User retrieved successfully",
+            'is_profile_created': is_profile_created,
+            'user': user_serializer.data,
+            'staff_profile': staff_profile_serializer.data if staff_profile else None,
+            # 'student_profile': student_profile_data,
+            'status': True
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return handle_exception(e)
