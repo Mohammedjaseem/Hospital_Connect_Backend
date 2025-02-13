@@ -147,9 +147,9 @@ def login(request):
         if not user:
             return Response({'error': 'Invalid email or password', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Uncomment this if organization-based authentication is needed
-        if user.org.id != org:
-            return Response({'error': 'You do not belong to this hospital', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
+        # # Uncomment this if organization-based authentication is needed
+        # if user.org.id != org:
+        #     return Response({'error': 'You do not belong to this hospital', 'status': False}, status=status.HTTP_400_BAD_REQUEST)
 
         # Handle unverified user
         if not user.is_verified:
