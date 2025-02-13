@@ -31,7 +31,7 @@ def apply_staff_hostel_gate_pass(request):
         # Check for a gate pass requested within the last 5 hours
         five_hours_ago = timezone.now() - timedelta(hours=5)
         latest_gate_pass = HostelStaffGatePass.objects.filter(
-            student=staff_profile, requested_on__gte=five_hours_ago
+            staff=staff_profile, requested_on__gte=five_hours_ago
         ).only('requested_on').first()
 
         if latest_gate_pass:
