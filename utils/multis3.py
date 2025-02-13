@@ -15,7 +15,7 @@ class TenantMediaStorage(S3Boto3Storage):
         Saves files in a tenant-specific directory with a UUID-based filename.
         """
         try:
-            # Debugging
+            # Debugging: Print initial file name
             print(f"🔹 Initial file name received: {name}")
             logger.info(f"Initial file name received: {name}")
 
@@ -28,7 +28,7 @@ class TenantMediaStorage(S3Boto3Storage):
             print(f"🏢 Uploading for tenant: {tenant_name}")
             logger.info(f"Uploading for tenant: {tenant_name}")
 
-            # Extract file extension (Ensure it always has a valid extension)
+            # Extract file extension
             ext = os.path.splitext(name)[1]
             if not ext:
                 logger.warning("⚠️ File extension missing, assigning '.jpg'")
@@ -40,20 +40,23 @@ class TenantMediaStorage(S3Boto3Storage):
             upload_subdirectory = os.path.dirname(name) if os.path.dirname(name) else "uploads"
             name = os.path.join(self.location, tenant_name, upload_subdirectory, uuid_name)
 
-            # Replace Windows-style backslashes (if any) with forward slashes
+            # Replace backslashes (for Windows compatibility)
             name = name.replace("\\", "/")
 
-            # Explicitly set the name inside the content object
-            content.name = name  # ✅ This is crucial!
+            # **Explicitly set content name (CRITICAL FIX)**
+            content.name = name  
 
             # Debugging
             print(f"✅ Final file path for S3: {name}")
             logger.info(f"Final file path in S3: {name}")
 
-            # Ensure content has a name before calling _save
-            if not content.name:
-                raise ValueError("⚠️ Content object has no name before saving!")
+            # Validate the content object before saving
+            if not content or not content.name:
+                logger.error("⚠️ Content object is invalid or has no name before saving!")
+                print("❌ Content object is invalid or has no name before saving!")
+                raise ValueError("Invalid file content. Ensure the file is correctly set before saving.")
 
+            # Call Django Storages `_save`
             return super()._save(name, content)
 
         except Exception as e:
