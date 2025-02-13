@@ -188,7 +188,8 @@ def login(request):
 
         # # Serialize user details
         user_serializer = CustomUserSerializer(user)
-        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}) if staff_profile else None
+        staff_profile_serializer = StaffProfileSerializer(staff_profile, context={'request': request}).data if staff_profile else None
+    
         # student_profile_serializer = StudentLoginSerializer(student_profile) if student_profile else None
         # enrolled_student_data = {
         #     'class': enrolled_student.classs if enrolled_student else None,
@@ -206,13 +207,14 @@ def login(request):
         #     student_profile_data = None
 
         # Return tokens and user profile data in response body
+        if staff_profile_serializer:
+            staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
         return Response({
             'message': "Login Successful",
             'status': True,
             'user': user_serializer.data,
             'is_profile_created': is_profile_created,
-            'is_hostel_incharge': is_hostel_incharge,
-            'staff_profile': staff_profile_serializer.data if staff_profile else None,
+            'staff_profile': staff_profile_serializer if staff_profile else None,
             # 'student_profile': student_profile_data,
             'access': access_token,
             'refresh': refresh_token
