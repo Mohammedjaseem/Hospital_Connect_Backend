@@ -11,7 +11,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffProfile
         fields = [
-            'id', 'is_active', 'user', 'name', 'gender','dob', 'mobile',
+            'id', 'is_active', 'user', 'name', 'gender','dob', 'mobile', 'emp_id', 'hostel', 'room_no',
             'department', 'designation', 'department_name', 'designation_name', 'is_verified',
             'is_hosteller', 'address', 'picture', 'blood_group',  'emergency_contact'
         ]
