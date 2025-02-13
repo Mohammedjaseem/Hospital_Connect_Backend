@@ -277,7 +277,8 @@ def get_my_pass_list(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
+        # gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
+        gatepasses = HostelStaffGatePass.objects.all()
 
         # Serialize gate passes
         serialized_gatepasses = HostelStaffGatePassSerializer(gatepasses, many=True).data
