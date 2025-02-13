@@ -32,7 +32,14 @@ class StaffProfile(models.Model, ImageCompressorMixin):
     )
     is_verified = models.BooleanField(default=False)
     is_hosteller = models.BooleanField(default=False)
- 
+    hostel = models.ForeignKey(
+        "hostel.Hostel",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hostel_staff",  # Explicit related_name to avoid clash
+    )
+    room_no = models.CharField(max_length=10, blank=True, null=True)
 
     # Store images in tenant-specific S3 folders
     picture = models.ImageField(
