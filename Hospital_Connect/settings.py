@@ -253,7 +253,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]  # ✅ Trusted frontend origin
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5173","https://am-connect.vercel.app" ]  # ✅ Trusted frontend origin
 
 
 # SESSION_COOKIE_HTTPONLY = True
