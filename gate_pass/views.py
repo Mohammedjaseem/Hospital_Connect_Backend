@@ -116,7 +116,7 @@ def apply_staff_hostel_gate_pass(request):
             "to": f"{mentor_number}",
             "type": "template",
             "template": {
-                "name": "staff_gatepass",
+                "name": "staff_hostel_pass_request",
                 "language": {"code": "en"},
                 "components": [
                     {"type": "header", "parameters": [{"type": "text", "text": tenant_name}]},
