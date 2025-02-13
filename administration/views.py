@@ -181,38 +181,35 @@ class VerifyStaffApiView(APIView):
             return Response({'error': f"Error unverifying staff: {str(e)}", 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# class AdminDashboardAPIView(APIView):
-#     permission_classes = [IsAuthenticated, IsTenantUser, IsSchoolAdmin]
+class AdminDashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTenantUser, IsHospitalAdmin]
 
-#     def get(self, request):
-#         try:
-#             # Total staff count
-#             total_staff = StaffProfile.objects.count()
-#             teaching_staff = StaffProfile.objects.filter(is_teaching_staff=True).count()
-#             non_teaching_staff = total_staff - teaching_staff
+    def get(self, request):
+        try:
+            # Total staff count
+            total_staff = StaffProfile.objects.count()
+    
 
-#             # Total departments
-#             total_departments = Departments.objects.count()
+            # Total departments
+            total_departments = Departments.objects.count()
 
-#             # Total Students
-#             total_students = StudentProfile.objects.count()
+            # Total Students
 
-#             # Response Data
-#             dashboard_data = {
-#                 "total_staff": total_staff,
-#                 "teaching_staff": teaching_staff,
-#                 "non_teaching_staff": non_teaching_staff,
-#                 "total_departments": total_departments,
-#                 "total_students": total_students,
-#             }
+            # Response Data
+            dashboard_data = {
+                "total_staff": total_staff,
+              
+                "total_departments": total_departments,
+                
+            }
 
-#             return Response(
-#                 {"data": dashboard_data, "status": True},
-#                 status=status.HTTP_200_OK,
-#             )
+            return Response(
+                {"data": dashboard_data, "status": True},
+                status=status.HTTP_200_OK,
+            )
 
-#         except Exception as e:
-#             return Response(
-#                 {"error": f"Error retrieving dashboard data: {str(e)}", "status": False},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
+        except Exception as e:
+            return Response(
+                {"error": f"Error retrieving dashboard data: {str(e)}", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -20,6 +20,7 @@ from app.models import Organizations
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.utils.http import http_date
 from datetime import timedelta, datetime
+from hostel.models import Hostel
 
 
 logger = logging.getLogger(__name__)
@@ -168,13 +169,17 @@ def login(request):
         # Initialize response variables
         staff_profile = None
         is_profile_created = False
+        is_hostel_incharge = False
 
         # Handle tenant-specific data
         with schema_context(user.org.client.schema_name):  # Switch to tenant schema
-            # Fetch student or staff profile
-            staff_profile = staff_profile = StaffProfile.objects.filter(user=user).select_related('department', 'designation').first()
-            if staff_profile:
-                is_profile_created = True
+            staff_profile = StaffProfile.objects.filter(user=user).select_related("department", "designation").first()
+
+            is_profile_created = bool(staff_profile)  # True if profile exists, else False
+            is_hostel_incharge = (
+                Hostel.objects.filter(incharge=staff_profile).exists()
+                if staff_profile else False
+            )
 
         # Generate JWT tokens
         token = RefreshToken.for_user(user)
@@ -206,6 +211,7 @@ def login(request):
             'status': True,
             'user': user_serializer.data,
             'is_profile_created': is_profile_created,
+            'is_hostel_incharge': is_hostel_incharge,
             'staff_profile': staff_profile_serializer.data if staff_profile else None,
             # 'student_profile': student_profile_data,
             'access': access_token,
@@ -362,12 +368,17 @@ def user_retrival(request):
         # Initialize response variables
         staff_profile, student_profile, enrolled_student = None, None, None
         is_profile_created = False
+        is_hostel_incharge = False
 
         # Handle tenant-specific data
-        with schema_context(user.org.client.schema_name):
-            # Fetch staff profile with related department and designation
-            staff_profile = StaffProfile.objects.filter(user=user).select_related('department', 'designation').first()
-            is_profile_created = bool(staff_profile)
+        with schema_context(user.org.client.schema_name):  # Switch to tenant schema
+            staff_profile = StaffProfile.objects.filter(user=user).select_related("department", "designation").first()
+
+            is_profile_created = bool(staff_profile)  # True if profile exists, else False
+            is_hostel_incharge = (
+                Hostel.objects.filter(incharge=staff_profile).exists()
+                if staff_profile else False
+            )
 
         # Serialize user details
         user_serializer = CustomUserSerializer(user)
@@ -395,6 +406,7 @@ def user_retrival(request):
             'is_profile_created': is_profile_created,
             'user': user_serializer.data,
             'staff_profile': staff_profile_serializer.data if staff_profile else None,
+            'is_hostel_incharge': is_hostel_incharge,
             # 'student_profile': student_profile_data,
             'status': True
         }, status=status.HTTP_200_OK)

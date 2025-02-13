@@ -37,7 +37,7 @@ urlpatterns = [
     # path('divisions/<int:pk>/', views.DivisionApiView.as_view(), name='division-detail'),
 
     # Dashboard
-    # path('dashboard/', views.AdminDashboardAPIView.as_view(), name='dashboard'),
+    path('dashboard/', views.AdminDashboardAPIView.as_view(), name='dashboard'),
     
     
 
