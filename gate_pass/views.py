@@ -363,15 +363,23 @@ def handle_gatepass_approval(gate_pass, formatted_data, staff_number):
 
         # Send WhatsApp Notification
         whatsapp_status = send_whatsapp_notification("hostel_staff_approved_pass", staff_number, formatted_data)
-        return Response(
-            {
-                "message": "Gate pass approved successfully",
-                "notification_status": whatsapp_status,
-                "wa_number": staff_number,
-                "status": True
-            },
-            status=status.HTTP_200_OK
-        )
+        if whatsapp_status == True:
+            return Response(
+                {
+                    "message": "Gate pass approved successfully",
+                    "notification_status": whatsapp_status,
+                    "wa_number": staff_number,
+                    "status": True
+                },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Gate pass approval failed to send WhatsApp message", 
+                 "notification_status": whatsapp_status,"
+                 "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     except Exception as e:
         return Response(
@@ -454,5 +462,5 @@ def send_whatsapp_notification(template_name, staff_number, data):
             "template": {"name": template_name, "language": {"code": "en"}, "components": [{"type": "body", "parameters": [{"type": "text", "text": value} for value in data.values()]}]},
         }
         return send_whatsapp_message(message_payload)
-    except Exception:
-        return False
+    except Exception as e:
+        return handle_exception(e)
