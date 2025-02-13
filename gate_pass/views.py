@@ -159,7 +159,7 @@ def apply_staff_hostel_gate_pass(request):
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
 
-        if notification_status:
+        if notification_status == True:
             return Response(
                 {"message": "Gate pass request sent successfully", "notification_status": notification_status, "status": True},
                 status=status.HTTP_200_OK
@@ -167,7 +167,7 @@ def apply_staff_hostel_gate_pass(request):
         else:
             gate_pass.delete()  # Rollback if message fails
             return Response(
-                {"message": "Gate pass request failed to send WhatsApp message", "status": False},
+                {"message": "Gate pass request failed to send WhatsApp message", "notification_status": notification_status, "status": False},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

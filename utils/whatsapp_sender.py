@@ -45,6 +45,4 @@ def send_whatsapp_message(request, passing_data, type, sent_to):
                 "status": "error",
                 "message": "Failed to send message",
                 "details": response.text,
-                "app_id": app_id
-            
             }
