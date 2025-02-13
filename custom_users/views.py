@@ -172,7 +172,7 @@ def login(request):
         # Handle tenant-specific data
         with schema_context(user.org.client.schema_name):  # Switch to tenant schema
             # Fetch student or staff profile
-            staff_profile = StaffProfile.objects.filter(user=user).first()
+            staff_profile = staff_profile = StaffProfile.objects.filter(user=user).select_related('department', 'designation').first()
             if staff_profile:
                 is_profile_created = True
 
