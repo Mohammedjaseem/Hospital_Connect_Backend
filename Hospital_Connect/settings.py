@@ -249,6 +249,9 @@ CORS_ALLOWED_ORIGINS = [
 
 
 
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]  # ✅ Trusted frontend origin
+
+
 # SESSION_COOKIE_HTTPONLY = True
 # SESSION_COOKIE_SECURE = False  # ✅ Match AUTH_COOKIE_SECURE
 # SESSION_COOKIE_SAMESITE = "None"  # ✅ Match CSRF and AUTH_COOKIE_SAMESITE
@@ -329,3 +332,8 @@ LOGGING = {
     },
 }
 
+
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (Only for testing)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+CORS_ALLOW_HEADERS = ["Authorization", "Content-Type"]
