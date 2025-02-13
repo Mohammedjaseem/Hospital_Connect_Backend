@@ -49,7 +49,6 @@ SHARED_APPS = [
     'rest_framework_simplejwt',
     'django_celery_results',
     'corsheaders',
-    'storages',
     'custom_users',
 ]
 
@@ -269,6 +268,11 @@ CORS_ALLOWED_ORIGINS = [
 # SECURE_BROWSER_XSS_FILTER = True  # Enable XSS protection
 
 
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+
+DEFAULT_FILE_STORAGE = 'path.to.TenantS3Boto3Storage'
+
 
 
 # AWS S3 Configuration
@@ -285,8 +289,3 @@ STATIC_URL = 'static/'
 
 
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-
-DEFAULT_FILE_STORAGE = 'path.to.TenantS3Boto3Storage'
