@@ -71,7 +71,7 @@ def apply_staff_hostel_gate_pass(request):
 
         # Create gate pass
         gate_pass = HostelStaffGatePass.objects.create(
-            student=staff_profile,
+            staff=staff_profile,
             mentor=mentor,
             purpose=purpose,
             requesting_date=requesting_date,
