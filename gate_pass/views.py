@@ -482,7 +482,10 @@ def HostelStaffGatePassApprove(request, token, decision):
             #reject reason
             reason = request.POST.get('reason')
             if not reason:
-                raise ValueError("Reason is required to reject the pass.")
+                return Response({
+                    "message": "Reason is required to reject the pass.",
+                    "status": False,
+                }, status=status.HTTP_400_BAD_REQUEST)
                            
             tentant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
@@ -506,7 +509,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": f"{staff_number}",
                 "type": "template",
                 "template": {
-                    "name": "hostel_staff_approved_pass",
+                    "name": "rejected_hostel_staff_gatepass",
                     "language": {"code": "en"},
                     "components": [
                         {
