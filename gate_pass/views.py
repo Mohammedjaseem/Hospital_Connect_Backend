@@ -8,11 +8,17 @@ import uuid
 from django.db.models import Count, Sum, Avg, Min, Max, DurationField, ExpressionWrapper, F
 from django.db.models.functions import ExtractWeekDay
 from django.http import JsonResponse
-
+from django.utils.crypto import get_random_string
 from .models import HostelStaffGatePass
+from .serializers import HostelStaffGatePassSerializer
 from utils.handle_exception import handle_exception
 from utils.whatsapp_sender import send_whatsapp_message
 from utils.fetch_staff import get_staff_profile
+from django.utils.timezone import now
+import os
+import boto3
+import pyqrcode
+from botocore.exceptions import NoCredentialsError 
 
 
 @api_view(['POST'])
@@ -110,7 +116,7 @@ def apply_staff_hostel_gate_pass(request):
             "to": f"{mentor_number}",
             "type": "template",
             "template": {
-                "name": "staff_gatepass",
+                "name": "staff_hostel_pass_request",
                 "language": {"code": "en"},
                 "components": [
                     {"type": "header", "parameters": [{"type": "text", "text": tenant_name}]},
@@ -156,7 +162,7 @@ def apply_staff_hostel_gate_pass(request):
             }
         }
         
-        mentor_number = 918086500023
+        # mentor_number = 918086500023
 
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
@@ -178,8 +184,8 @@ def apply_staff_hostel_gate_pass(request):
 
     except Exception as e:
         return handle_exception(e)
-
     
+
 
 
 @api_view(['GET'])
@@ -263,5 +269,198 @@ def gate_pass_report(request):
         return handle_exception(e)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def get_my_pass_list(request):
+    try:
+        # Get staff profile
+        staff_profile = get_staff_profile(request)
+
+        # Get gate passes for the staff
+        # gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
+        gatepasses = HostelStaffGatePass.objects.all()
+
+        # Serialize gate passes
+        serialized_gatepasses = HostelStaffGatePassSerializer(gatepasses, many=True).data
+
+        return Response({
+                "data": serialized_gatepasses,
+                "status": True,
+            }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return handle_exception(e)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def HostelStaffGatePassApprove(request, token, decision):
+    try:
+        gate_pass = HostelStaffGatePass.objects.get(pass_token=token)
+        
+        if gate_pass.mentor_updated is not None:
+            status_msg = "approved" if gate_pass.mentor_updated else "rejected"
+            return Response(
+                {"message": f"Request is already {status_msg}!", "status": False},
+                status=status.HTTP_200_OK
+            )
+
+        if decision not in ["Approve", "Reject"]:
+            return Response(
+                {"message": "Invalid decision provided!", "status": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Fetch and format required data
+        formatted_data = {
+            "tenant_name": "Mims",
+            "mentor_name": gate_pass.mentor.name.strip(),
+            "mentor_department": gate_pass.mentor.department.name.strip(),
+            "mentor_designation": gate_pass.mentor.designation.name.strip(),
+            "check_out_date": gate_pass.requesting_date.strftime('%d-%m-%Y'),
+            "check_out_time": gate_pass.requesting_time.strftime('%I:%M %p'),
+            "check_in_date": gate_pass.return_date.strftime('%d-%m-%Y'),
+            "check_in_time": gate_pass.return_time.strftime('%I:%M %p'),
+            "purpose": gate_pass.purpose
+        }
+        
+        # Format Staff Number
+        staff_number = gate_pass.staff.mobile.strip().replace(" ", "")
+        staff_number = staff_number.lstrip("+")  # Remove '+' prefix
+
+        if decision == "Approve":
+            return handle_gatepass_approval(gate_pass, formatted_data, staff_number)
+
+        elif decision == "Reject":
+            reason = request.POST.get('reason')
+            if not reason:
+                return Response({"message": "Reason is required to reject the pass.", "status": False},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            return handle_gatepass_rejection(gate_pass, formatted_data, staff_number, reason)
+
+    except HostelStaffGatePass.DoesNotExist:
+        return Response({"message": "Invalid gate pass token!", "status": False}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"message": str(e), "status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+def handle_gatepass_approval(gate_pass, formatted_data, staff_number):
+    try:
+        # Generate gate pass number
+        gate_pass.updated_on = now()
+        gate_pass.mentor_updated = True
+        gate_pass.gatepass_no = get_random_string(length=6) + str(gate_pass.id)
+        gate_pass.request_status = "Approved"
+
+        # Upload QR Code to S3
+        qr_code_url = generate_and_upload_qr(gate_pass)
+        if not qr_code_url:
+            return Response(
+                {"message": "QR code generation failed.", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        gate_pass.qr_code_url = qr_code_url
+        gate_pass.save()
+
+        # Send WhatsApp Notification
+        whatsapp_status = send_whatsapp_notification("hostel_staff_approved_pass", staff_number, formatted_data)
+        if whatsapp_status == True:
+            return Response(
+                {
+                    "message": "Gate pass approved successfully",
+                    "notification_status": whatsapp_status,
+                    "wa_number": staff_number,
+                    "status": True
+                },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Gate pass approval failed to send WhatsApp message", 
+                 "notification_status": whatsapp_status,"
+                 "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    except Exception as e:
+        return Response(
+            {"message": f"Error approving gate pass: {e}", "status": False},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+def handle_gatepass_rejection(gate_pass, formatted_data, staff_number, reason):
+    try:
+        formatted_data["rejection_reason"] = reason
+
+        whatsapp_status = send_whatsapp_notification("hostel_staff_rejected_pass", staff_number, formatted_data)
+
+        if whatsapp_status:
+            gate_pass.request_status = "Rejected"
+            gate_pass.remarks = reason
+            gate_pass.mentor_updated = True
+            gate_pass.updated_on = now()
+            gate_pass.save()
+
+            return Response(
+                {
+                    "message": "Gate pass rejected successfully",
+                    "notification_status": whatsapp_status,
+                    "wa_number": staff_number,
+                    "status": True
+                },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Gate pass rejection failed to send WhatsApp message", "status": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    except Exception as e:
+        return Response(
+            {"message": f"Error rejecting gate pass: {e}", "status": False},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+def generate_and_upload_qr(gate_pass):
+    try:
+        # AWS Credentials
+        aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+        aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        aws_region = os.getenv("AWS_REGION")
+        bucket_name = os.getenv("AWS_STORAGE_BUCKET_NAME")
+        directory = "GatePass/HostelStaff/qrCodes/"
+        s3_filename = f"{directory}{gate_pass.gatepass_no}.png"
+
+        # Generate QR Code
+        qr = pyqrcode.create(gate_pass.pass_token)
+        local_file = f"{gate_pass.gatepass_no}.png"
+        qr.png(local_file, scale=6)
+
+        # Upload to S3
+        s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=aws_region)
+        s3.upload_file(local_file, bucket_name, s3_filename)
+        s3.put_object_acl(Bucket=bucket_name, Key=s3_filename, ACL="public-read")
+
+        os.remove(local_file)  # Clean up local file
+
+        return f"https://{bucket_name}.s3.{aws_region}.amazonaws.com/{s3_filename}"
+    
+    except NoCredentialsError:
+        return "cred issues"
+    except Exception as e:
+        return handle_exception(e)
+
+
+def send_whatsapp_notification(template_name, staff_number, data):
+    try:
+        message_payload = {
+            "messaging_product": "whatsapp",
+            "to": staff_number,
+            "type": "template",
+            "template": {"name": template_name, "language": {"code": "en"}, "components": [{"type": "body", "parameters": [{"type": "text", "text": value} for value in data.values()]}]},
+        }
+        return send_whatsapp_message(message_payload)
+    except Exception as e:
+        return handle_exception(e)

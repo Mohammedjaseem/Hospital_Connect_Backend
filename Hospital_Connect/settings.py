@@ -158,7 +158,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'  # URL prefix for static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory for collectstatic files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # Directory for collectstatic files
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

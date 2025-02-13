@@ -3,10 +3,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import re_path as url
 from django.views.static import serve
+from django.contrib import admin
 
 
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('api/staff/', include('staff.urls')),
     path('api/administration/', include('administration.urls')),
     path('hostel/', include('hostel.urls')),
