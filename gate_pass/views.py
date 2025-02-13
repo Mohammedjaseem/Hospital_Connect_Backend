@@ -465,6 +465,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 return Response(
                     {"message": "Gate pass approval failed to send WhatsApp message",
                      "url": f"{gate_pass.qr_code_url}",
+                     "message" : message,
                      "notification_status": whatsapp_alert_to_staff, 
                      "status": False},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
