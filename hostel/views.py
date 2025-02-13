@@ -20,7 +20,7 @@ def create_hostel(request):
 # ✅ View All Hostels
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
+# @authentication_classes([TokenAuthentication])
 def list_hostels(request):
     hostels = Hostel.objects.all()
     serializer = HostelSerializer(hostels, many=True)
@@ -29,7 +29,7 @@ def list_hostels(request):
 # ✅ View Single Hostel
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
+# @authentication_classes([TokenAuthentication])
 def get_hostel(request, hostel_id):
     try:
         hostel = Hostel.objects.get(id=hostel_id)
@@ -42,7 +42,7 @@ def get_hostel(request, hostel_id):
 # ✅ Update Hostel
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
+# @authentication_classes([TokenAuthentication])
 def update_hostel(request, hostel_id):
     try:
         hostel = Hostel.objects.get(id=hostel_id)
