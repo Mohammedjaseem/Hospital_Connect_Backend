@@ -286,3 +286,46 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'  #
 DEFAULT_FILE_STORAGE = 'utils.multis3.TenantMediaStorage'
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+
+
+
+
+
+
+
+import logging
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "storages": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "boto3": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "botocore": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
+
