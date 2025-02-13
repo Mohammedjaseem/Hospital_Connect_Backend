@@ -26,6 +26,7 @@ pg_dump*
 celerybeat-schedule
 *.celerybeat
 
+notes.txt
 
 
 # Redis

@@ -8,13 +8,14 @@ import uuid
 from .models import HostelStaffGatePass
 from utils.handle_exception import handle_exception
 from utils.whatsapp_sender import send_whatsapp_message
+from utils.fetch_staff import get_staff_profile
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def apply_staff_hostel_gate_pass(request):
     try:
-        staff_profile = request.user.staff_profile
+        staff_profile = get_staff_profile(request)
 
         # Ensure user is hostel staff
         if not staff_profile.is_hosteler:
