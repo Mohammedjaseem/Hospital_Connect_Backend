@@ -96,7 +96,7 @@ class StaffProfileView(APIView):
     def post(self, request):
         try:
             data = request.data.copy()
-            validate_required_fields(data, ['name', 'dob', 'mobile', 'department', 'designation', 'picture'])
+            validate_required_fields(data,['name', 'dob', 'mobile', 'department', 'designation', 'picture'])
 
             data['user'] = request.user.id
             serializer = StaffProfileSerializer(data=data)
