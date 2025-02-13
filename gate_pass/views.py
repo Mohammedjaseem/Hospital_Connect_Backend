@@ -67,7 +67,12 @@ def apply_staff_hostel_gate_pass(request):
 
         # Get mentor details
         mentor = staff_profile.hostel.incharge
-        mentor_number = mentor.mobile
+        mentor_number = mentor.mobile.strip().replace(" ", "")
+
+        # Remove leading '+' if present
+        if mentor_number.startswith('+'):
+            mentor_number = mentor_number[1:]
+            
 
         # Create gate pass
         gate_pass = HostelStaffGatePass.objects.create(
