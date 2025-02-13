@@ -15,7 +15,7 @@ class TenantMediaStorage(S3Boto3Storage):
         Saves files in a tenant-specific directory with a UUID-based filename.
         """
         try:
-            # Debug: Print the incoming file name
+            # Debugging
             print(f"🔹 Initial file name received: {name}")
             logger.info(f"Initial file name received: {name}")
 
@@ -40,15 +40,19 @@ class TenantMediaStorage(S3Boto3Storage):
             upload_subdirectory = os.path.dirname(name) if os.path.dirname(name) else "uploads"
             name = os.path.join(self.location, tenant_name, upload_subdirectory, uuid_name)
 
-            # Replace backslashes (for Windows compatibility)
+            # Replace Windows-style backslashes (if any) with forward slashes
             name = name.replace("\\", "/")
 
-            # Debug: Print final computed name
+            # Explicitly set the name inside the content object
+            content.name = name  # ✅ This is crucial!
+
+            # Debugging
             print(f"✅ Final file path for S3: {name}")
             logger.info(f"Final file path in S3: {name}")
 
-            # Set file name explicitly
-            content.name = name
+            # Ensure content has a name before calling _save
+            if not content.name:
+                raise ValueError("⚠️ Content object has no name before saving!")
 
             return super()._save(name, content)
 
