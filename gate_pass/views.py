@@ -34,16 +34,16 @@ def apply_staff_hostel_gate_pass(request):
             staff=staff_profile, requested_on__gte=five_hours_ago
         ).only('requested_on').first()
 
-        if latest_gate_pass:
-            time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
-            hours, minutes = divmod(time_left.total_seconds(), 3600)
-            return Response(
-                {
-                    "message": f"You have already requested a gate pass within the last 5 hours. Please try after {int(hours):02}:{int(minutes // 60):02}.",
-                    "status": False,
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # if latest_gate_pass:
+        #     time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
+        #     hours, minutes = divmod(time_left.total_seconds(), 3600)
+        #     return Response(
+        #         {
+        #             "message": f"You have already requested a gate pass within the last 5 hours. Please try after {int(hours):02}:{int(minutes // 60):02}.",
+        #             "status": False,
+        #         },
+        #         status=status.HTTP_400_BAD_REQUEST
+        #     )
 
         # Required fields validation
         required_fields = ['purpose', 'requesting_date', 'requesting_time', 'return_date', 'return_time']
