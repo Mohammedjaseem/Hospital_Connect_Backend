@@ -206,7 +206,7 @@ def login(request):
             'status': True,
             'user': user_serializer.data,
             'is_profile_created': is_profile_created,
-            # 'staff_profile': staff_profile_serializer.data if staff_profile else None,
+            'staff_profile': staff_profile_serializer.data if staff_profile else None,
             # 'student_profile': student_profile_data,
             'access': access_token,
             'refresh': refresh_token
