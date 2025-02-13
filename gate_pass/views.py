@@ -158,7 +158,7 @@ def apply_staff_hostel_gate_pass(request):
 
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
-
+        print("notification_status", notification_status)
         if notification_status == True:
             return Response(
                 {"message": "Gate pass request sent successfully", "notification_status": notification_status, "status": True},
