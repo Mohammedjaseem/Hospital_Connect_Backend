@@ -35,7 +35,6 @@ class HostelStaffGatePass(models.Model):
     mentor = models.ForeignKey("staff.StaffProfile", verbose_name=_("mentor_warden"), related_name="gatepass_mentor", on_delete=models.CASCADE, null=True, blank=True)
     mentor_updated = models.BooleanField(null=True, blank=True)
     updated_on = models.DateTimeField(blank=True, null=True, verbose_name="Mentor Update On")
-    qr_code = models.ImageField(TenantMediaStorage(), upload_to='GatePass/qrCodes/%Y/%m/%d/', blank=True, null=True)
     qr_code_url = models.CharField(max_length=1560, blank=True, null=True)
     
     #mentor remarks on rejected !

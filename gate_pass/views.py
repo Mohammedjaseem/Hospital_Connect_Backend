@@ -8,11 +8,15 @@ import uuid
 from django.db.models import Count, Sum, Avg, Min, Max, DurationField, ExpressionWrapper, F
 from django.db.models.functions import ExtractWeekDay
 from django.http import JsonResponse
-
+from django.utils.crypto import get_random_string
 from .models import HostelStaffGatePass
 from utils.handle_exception import handle_exception
 from utils.whatsapp_sender import send_whatsapp_message
 from utils.fetch_staff import get_staff_profile
+import os
+import boto3
+import pyqrcode
+from botocore.exceptions import NoCredentialsError 
 
 
 @api_view(['POST'])
@@ -156,7 +160,7 @@ def apply_staff_hostel_gate_pass(request):
             }
         }
         
-        mentor_number = 918086500023
+        # mentor_number = 918086500023
 
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
@@ -178,6 +182,9 @@ def apply_staff_hostel_gate_pass(request):
 
     except Exception as e:
         return handle_exception(e)
+    
+    
+
 
     
 
@@ -264,4 +271,269 @@ def gate_pass_report(request):
 
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def HostelStaffGatePassApprove(request, token, decision):
+
+    try:
+        gate_pass = HostelStaffGatePass.objects.get(pass_token=token)
+        if gate_pass.mentor_updated is not None:
+            mentor_updated = "approved" if gate_pass.mentor_updated else "rejected"
+            return Response({
+                "message": f"Request is already {mentor_updated} !",
+                "status": False,
+            }, status=status.HTTP_200_OK)
+
+        if decision == "Approve":
+            gate_pass.updated_on = datetime.datetime.now()
+            gate_pass.gatepass_no = get_random_string(length=6) + str(gate_pass.id)
+
+            
+            # Assuming you have AWS credentials configured as environment variables or in some other way
+            aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+            aws_region = os.getenv("AWS_REGION")
+            bucket_name = os.getenv("AWS_STORAGE_BUCKET_NAME")
+            
+
+            # Create an S3 client
+            s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=aws_region)
+
+            # Ensure the directory exists in S3 before saving the file
+            directory = 'GatePass/HostelStaff/qrCodes/'
+            s3_directory = f'{directory}{gate_pass.gatepass_no}.png'
+
+            # Generate QR code
+            try:
+                qr_code = pyqrcode.create(f"{gate_pass.pass_token}")
+            except Exception as e:
+                return Response({
+                "message": str(f"Error generating QR code: {e}"),
+                "status": False,
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Save QR code to a local file temporarily
+            local_qr_code_path = f'{gate_pass.gatepass_no}.png'
+            try:
+                qr_code.png(local_qr_code_path, scale=6)
+            except Exception as e:
+                print(f"Error saving QR code locally: {e}")
+                # Handle the error or exit the function if saving the QR code fails
+                return Response({
+                "message": str(f'Error saving QR code locally: {e}'),
+                "status": False,
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Upload the local file to S3
+            try:
+                upload = s3.upload_file(local_qr_code_path, bucket_name, s3_directory)
+
+                # Set the ACL to 'public-read' to make the object publicly accessible
+                s3.put_object_acl(Bucket=bucket_name, Key=s3_directory, ACL='public-read')
+
+                # Wait for the object to exist before printing success message
+                s3.get_waiter('object_exists').wait(Bucket=bucket_name, Key=s3_directory)
+
+                print("File successfully uploaded to S3")
+                gate_pass.qr_code_url = f'https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/{s3_directory}'
+                gate_pass.save()
+                
+            except NoCredentialsError:
+                message = message + " | No s3 cred found"
+            except Exception as e:
+                message = message + f"Error uploading file to S3: {e}"
+            finally:
+                # Clean up: Remove the local file after uploading to S3
+                os.remove(local_qr_code_path)
+                
+                
+
+            qr_code_url = gate_pass.qr_code_url
+            tentant_name = "Mims"
+            mentor_name = str(gate_pass.mentor.name).strip()
+            mentor_department = str(gate_pass.mentor.department.name).strip()
+            mentor_designation = str(gate_pass.mentor.designation.name).strip()
+            check_out_date = gate_pass.requesting_date.strftime('%d-%m-%Y')
+            check_out_time = gate_pass.requesting_time.strftime('%I:%M %p')
+            check_in_date = gate_pass.return_date.strftime('%d-%m-%Y')
+            check_in_time = gate_pass.return_time.strftime('%I:%M %p')
+            
+            staff_number = str(gate_pass.staff.mobile).strip()
+            parent_name = str(gate_pass.student.parent_name).strip()
+            org_name = str(gate_pass.student.user.organization.name)
+            org_code = str(gate_pass.student.user.organization.short_code).strip()
+            student_name = str(gate_pass.student.name).strip()
+            date = str(gate_pass.requesting_date).strip()
+            time = str(requesting_time).strip()
+            check_in_date = str(gate_pass.return_date).strip()
+            check_in_time = str(return_time).strip()
+            purpose =str(gate_pass.purpose).strip()
+            mentor = str(gate_pass.student.batch.class_in_charge.name).strip()
+            mentor_number = str(gate_pass.student.batch.class_in_charge.mobile).strip()
+            
+            # # WhatsApp message to Student parent
+            data = {
+                "messaging_product": "whatsapp",
+                "to": f"91{staff_number}",
+                "type": "template",
+                "template": {
+                    "name": "hostel_staff_approved_pass",
+                    "language": {"code": "en"},
+                    "components": [
+                        {
+                            "type": "body",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": parent_name
+                                },
+                                {
+                                    "type": "text",
+                                    "text": org_name
+                                },
+                                {
+                                    "type": "text",
+                                    "text": str(org_code) + " Connect"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": student_name
+                                },
+                                {
+                                    "type": "text",
+                                    "text": date
+                                },
+                                {
+                                    "type": "text",
+                                    "text": time
+                                },
+                                {
+                                    "type": "text",
+                                    "text": purpose
+                                },
+                                {
+                                    "type": "text",
+                                    "text": mentor
+                                },
+                                {
+                                    "type": "text",
+                                    "text": check_in_date
+                                },
+                                {
+                                    "type": "text",
+                                    "text": check_in_time
+                                },
+                                {
+                                    "type": "text",
+                                    "text": mentor_number
+                                },
+                            ]
+                        }
+                    ]
+                }
+            }
+            
+            type = f"Gatepass Message to '{parent_name}' Parent of '{student_name}', Approved by Mentor {mentor}"
+            sent_to = parent_number
+            org = gate_pass.student.user.organization.id
+            try:
+                send_whatsapp_message_parent = send_whatsapp_message(request, passing_data=data, type=type, sent_to=sent_to, org=org)
+            except Exception as e:
+                send_whatsapp_message_parent = str(e)
+                
+            # Update request status
+            gate_pass.mentor_approved = True
+            gate_pass.informed_warden = mailed_to_hostel
+            gate_pass.informed_parent = send_whatsapp_message_parent
+            gate_pass.request_status = "Approved"
+            gate_pass.save()
+
+            message = "GatePass Approved !"
+            status_code = status.HTTP_200_OK
+            request_status = True
+            
+            context = {
+                'student_name': gate_pass.student.name,
+                'check_out': str(gate_pass.requesting_date) + " | " + str(gate_pass.requesting_time),
+                'check_in': str(gate_pass.return_date) + " | " + str(gate_pass.return_time),
+                'mentor': gate_pass.student.batch.class_in_charge.name,
+                'status': gate_pass.request_status,
+                'status_time': datetime.datetime.now(),
+                'purpose': gate_pass.purpose,
+                'mentor_approved': gate_pass.mentor_approved,
+                'informed_warden' : mailed_to_hostel,
+                'informed_parent' : send_whatsapp_message_parent,
+                'request_status' : gate_pass.request_status   
+            }
+            
+            return Response(context, status=status_code)
+                
+
+        elif decision == "Reject":
+            #reject reason
+            reason = request.POST.get('reason')
+            if not reason:
+                raise ValueError("Reason is required to reject the pass.")
+            
+            # Mail to student
+            subject = f"{gate_pass.student.name} Your Gatepass Request has been Rejected | ID: #{gate_pass.id}"
+            message = render_to_string('students/passRejected.html', {
+                'student_name': gate_pass.student.name,
+                'check_out': str(gate_pass.requesting_date) + " | " + str(gate_pass.requesting_time),
+                'check_in': str(gate_pass.return_date) + " | " + str(gate_pass.return_time),
+                'mentor': gate_pass.student.batch.class_in_charge,
+                'status': "Rejected !",
+                'status_time': datetime.datetime.now(),
+                'purpose': gate_pass.purpose,
+                'reason': reason,
+                'org_banner_url' : request.build_absolute_uri(gate_pass.student.user.organization.email_banner.url),
+            })
+            org=request.user.organization
+            mailed_to_student = send_email(org,subject, message, gate_pass.student.user.email)
+            mailed_to_student_success = mailed_to_student
+
+            # Update request status
+            gate_pass.mentor_approved = False
+            gate_pass.approved_on = datetime.datetime.now()
+            gate_pass.informed_warden = False
+            gate_pass.informed_parent = False
+            gate_pass.request_status = "Rejected"
+            gate_pass.remarks = reason
+            mailed_to_hostel = False
+            gate_pass.save()
+
+            message = "GatePass Rejected !"
+            status_code = status.HTTP_200_OK
+            request_status = True
+
+            context = {
+                'student_name': gate_pass.student.name,
+                'check_out': str(gate_pass.requesting_date) + " | " + str(gate_pass.requesting_time),
+                'check_in': str(gate_pass.return_date) + " | " + str(gate_pass.return_time),
+                'mentor': gate_pass.student.batch.class_in_charge,
+                'status': "Rejected !",
+                'status_time': datetime.datetime.now(),
+                'purpose': gate_pass.purpose,
+                'reason': reason,
+                }
+            return Response({
+                "message": message,
+                "status": request_status,
+                }, status=status_code)
+            
+        else:
+            return Response({"message": "Invalid decision."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "message": message,
+            "status": request_status,
+            "mailed_to_hostel": mailed_to_hostel,
+            "mailed_to_student": mailed_to_student_success,
+            "informed_parent": True,
+            "whatsApp_api": whatsApp_api,
+        }, status=status_code)
+    
+    except Exception as e:
+        return handle_exception(e)
+    
 
