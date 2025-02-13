@@ -12,7 +12,10 @@ class TenantMediaStorage(S3Boto3Storage):
         and rename the file to a UUID-based file name.
         """
         if not name:
+            print("name is not set")
             raise ValueError("File name is not set. Ensure 'upload_to' is correctly defined in the model.")
+        print(name)
+
 
         # Get the current tenant schema name
         tenant_name = self.get_current_tenant_name()
