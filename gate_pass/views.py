@@ -348,6 +348,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             # Upload the local file to S3
+            message = ""
             try:
                 upload = s3.upload_file(local_qr_code_path, bucket_name, s3_directory)
 
@@ -360,7 +361,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 print("File successfully uploaded to S3")
                 gate_pass.qr_code_url = f'https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/{s3_directory}'
                 gate_pass.save()
-                
+            
             except NoCredentialsError:
                 message = message + " | No s3 cred found"
             except Exception as e:
