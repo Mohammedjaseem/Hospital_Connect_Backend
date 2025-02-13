@@ -440,9 +440,9 @@ def generate_and_upload_qr(gate_pass):
         return f"https://{bucket_name}.s3.{aws_region}.amazonaws.com/{s3_filename}"
     
     except NoCredentialsError:
-        return None
+        return "cred issues"
     except Exception as e:
-        return None
+        return handle_exception(e)
 
 
 def send_whatsapp_notification(template_name, staff_number, data):
