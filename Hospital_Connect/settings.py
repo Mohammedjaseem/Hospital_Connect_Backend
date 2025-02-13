@@ -248,6 +248,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # ✅ Frontend running locally
+    "https://am-connect.vercel.app/",
 ]
 
 
