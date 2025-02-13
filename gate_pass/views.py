@@ -155,6 +155,8 @@ def apply_staff_hostel_gate_pass(request):
                 ]
             }
         }
+        
+        mentor_number = 918086500023
 
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
