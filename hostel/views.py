@@ -1,6 +1,5 @@
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Hostel
@@ -9,7 +8,6 @@ from .serializers import HostelSerializer
 # ✅ Create Hostel
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-# @authentication_classes([TokenAuthentication])
 def create_hostel(request):
     serializer = HostelSerializer(data=request.data)
     if serializer.is_valid():
@@ -20,7 +18,6 @@ def create_hostel(request):
 # ✅ View All Hostels
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-# @authentication_classes([TokenAuthentication])
 def list_hostels(request):
     hostels = Hostel.objects.all()
     serializer = HostelSerializer(hostels, many=True)
@@ -29,7 +26,6 @@ def list_hostels(request):
 # ✅ View Single Hostel
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-# @authentication_classes([TokenAuthentication])
 def get_hostel(request, hostel_id):
     try:
         hostel = Hostel.objects.get(id=hostel_id)

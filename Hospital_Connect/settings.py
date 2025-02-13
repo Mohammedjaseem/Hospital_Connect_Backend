@@ -56,6 +56,8 @@ TENANT_APPS = [
     'administration',
     'staff',
     'hostel',
+    'connect_bills',
+    'gate_pass',
     ]
 
 INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_APPS]
