@@ -161,7 +161,10 @@ def apply_staff_hostel_gate_pass(request):
         print("notification_status", notification_status)
         if notification_status == True:
             return Response(
-                {"message": "Gate pass request sent successfully", "notification_status": notification_status, "status": True},
+                {"message": "Gate pass request sent successfully", 
+                 "notification_status": notification_status, 
+                 "wa_number": mentor_number,
+                 "status": True},
                 status=status.HTTP_200_OK
             )
         else:
