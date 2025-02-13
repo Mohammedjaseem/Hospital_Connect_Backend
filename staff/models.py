@@ -5,8 +5,9 @@ from django.utils.safestring import mark_safe
 from datetime import date
 from utils.multis3 import TenantMediaStorage
 from utils.choices import GenderChoices, BloodGroupChoices
+from utils.image_compressor import ImageCompressorMixin
 
-class StaffProfile(models.Model):
+class StaffProfile(models.Model, ImageCompressorMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     is_active = models.BooleanField(default=True)
     user = models.OneToOneField("custom_users.CustomUser", on_delete=models.CASCADE, related_name="staff_profile")
