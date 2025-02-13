@@ -394,7 +394,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "template": {
                     "name": "hostel_staff_approved_pass",
                     "language": {"code": "en"},
-                    "components": 
+                    "components": [
                         {
                             "type": "body",
                             "parameters": [
@@ -435,7 +435,6 @@ def HostelStaffGatePassApprove(request, token, decision):
                     ]
                 }
             }
-            
             
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
