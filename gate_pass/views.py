@@ -67,7 +67,7 @@ def apply_staff_hostel_gate_pass(request):
 
         # Get mentor details
         mentor = staff_profile.hostel.incharge
-        mentor_number = mentor.staff_profile.mobile
+        mentor_number = mentor.mobile
 
         # Create gate pass
         gate_pass = HostelStaffGatePass.objects.create(
