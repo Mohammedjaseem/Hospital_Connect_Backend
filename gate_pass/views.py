@@ -306,7 +306,7 @@ def HostelStaffGatePassApprove(request, token, decision):
             }, status=status.HTTP_200_OK)
 
         if decision == "Approve":
-            gate_pass.updated_on = datetime.datetime.now()
+            gate_pass.updated_on = datetime.now()
             gate_pass.mentor_updated = True
             gate_pass.gatepass_no = get_random_string(length=6) + str(gate_pass.id)
             gate_pass.request_status = "Approved"
