@@ -18,7 +18,7 @@ from django.utils.timezone import now
 import os
 import boto3
 import pyqrcode
-from botocore.exceptions import NoCredentialsError 
+from botocore.exceptions import NoCredentialsError, ClientError
 
 
 @api_view(['POST'])
@@ -347,28 +347,34 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "status": False,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Upload the local file to S3
-            message = ""
+
             try:
-                upload = s3.upload_file(local_qr_code_path, bucket_name, s3_directory)
+                # Upload the local file to S3
+                message = ""
+                s3.upload_file(local_qr_code_path, bucket_name, s3_directory)
 
-                # Set the ACL to 'public-read' to make the object publicly accessible
-                s3.put_object_acl(Bucket=bucket_name, Key=s3_directory)
+                # ✅ Verify upload success
+                try:
+                    s3.head_object(Bucket=bucket_name, Key=s3_directory)
+                    print("✅ File successfully uploaded to S3")
+                    
+                    # ✅ Generate and save public URL
+                    gate_pass.qr_code_url = f'https://{bucket_name}.s3.ap-south-1.amazonaws.com/{s3_directory}'
+                    gate_pass.save()
+                
+                except ClientError as e:
+                    message += f" | Failed to verify file: {e}"
 
-                # Wait for the object to exist before printing success message
-                s3.get_waiter('object_exists').wait(Bucket=bucket_name, Key=s3_directory)
-
-                print("File successfully uploaded to S3")
-                gate_pass.qr_code_url = f'https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/{s3_directory}'
-                gate_pass.save()
-            
             except NoCredentialsError:
-                message = message + " | No s3 cred found"
+                message += " | No S3 credentials found"
             except Exception as e:
-                message = message + f"Error uploading file to S3: {e}"
+                message += f" | Error uploading file to S3: {e}"
+
             finally:
-                # Clean up: Remove the local file after uploading to S3
-                os.remove(local_qr_code_path)
+                # ✅ Ensure cleanup of local files
+                if os.path.exists(local_qr_code_path):
+                    os.remove(local_qr_code_path)
+
                 
                
 
