@@ -5,15 +5,15 @@ from .models import StaffProfile
 class StaffProfileSerializer(serializers.ModelSerializer):
     department_name = serializers.SerializerMethodField()
     designation_name = serializers.SerializerMethodField()
-    blood_group_display = serializers.CharField(source="get_blood_group_display", read_only=True)
-    gender_display = serializers.CharField(source="get_gender_display", read_only=True)
+    # blood_group_display = serializers.CharField(source="get_blood_group_display", read_only=True)
+    # gender_display = serializers.CharField(source="get_gender_display", read_only=True)
 
     class Meta:
         model = StaffProfile
         fields = [
-            'id', 'is_active', 'user', 'name', 'gender', 'gender_display', 'dob', 'mobile',
+            'id', 'is_active', 'user', 'name', 'gender','dob', 'mobile',
             'department', 'designation', 'department_name', 'designation_name', 'is_verified',
-            'is_hosteller', 'address', 'picture', 'blood_group', 'blood_group_display', 'emergency_contact'
+            'is_hosteller', 'address', 'picture', 'blood_group',  'emergency_contact'
         ]
         read_only_fields = ('uuid',)
 
