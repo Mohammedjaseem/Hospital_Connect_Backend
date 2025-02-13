@@ -376,7 +376,7 @@ def handle_gatepass_approval(gate_pass, formatted_data, staff_number):
         else:
             return Response(
                 {"message": "Gate pass approval failed to send WhatsApp message", 
-                 "notification_status": whatsapp_status,"
+                 "notification_status": whatsapp_status,
                  "status": False},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
