@@ -99,6 +99,7 @@ class StaffProfileView(APIView):
             validate_required_fields(data,['name', 'dob', 'mobile', 'department', 'designation', 'picture'])
 
             data['user'] = request.user.id
+            data['is_active']=True
             serializer = StaffProfileSerializer(data=data)
             try:
                 serializer.is_valid(raise_exception=True)
