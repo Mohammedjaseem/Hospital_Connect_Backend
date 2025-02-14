@@ -284,7 +284,13 @@ def get_my_pass_list(request):
         # Serialize gate passes with pagination
         paginated_gatepasses = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
         
-        return paginated_gatepasses
+        
+        return Response({
+            "status": True,
+            "message": "Gate passes retrieved successfully",
+            "data": paginated_gatepasses
+        })
+    
     except Exception as e:
         return handle_exception(e)
 
