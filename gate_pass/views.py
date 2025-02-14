@@ -618,3 +618,71 @@ def HostelStaffGatePassApprove(request, token, decision):
             
     except Exception as e:
         return handle_exception(e)
+    
+    
+
+
+@api_view(['GET'])
+def check_in_check_out_marker(request):
+    gatepass_code = request.GET.get('unique_id', None)
+    if not gatepass_code:
+        return JsonResponse({'status': False, 'message': 'Gatepass code is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Determine the type based on gatepass_code and set model and serializer accordingly
+    model, serializer = (HostelStaffGatePass, HostelStaffGatePassSerializer)
+    
+    try:
+        gatepass = model.objects.get(pass_token=gatepass_code)
+    except model.DoesNotExist:
+        return JsonResponse({'status': False, 'message': 'Invalid gatepass code'}, status=status.HTTP_404_NOT_FOUND)
+
+    current_time = timezone.now()
+    today = current_time.date()
+
+    # Check for valid date
+    if not gatepass.checked_out:
+        if gatepass.requesting_date != today:
+            return JsonResponse({
+                'status': False, 
+                'message': f'This Gatepass is only valid to checkout on {gatepass.requesting_date}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+    return handle_check_in_out(gatepass, current_time, gatepass_code,serializer)
+
+def  handle_check_in_out(gatepass, current_time, gatepass_code,serializer):
+    # Handle check-out
+    if not gatepass.checked_out:
+        gatepass.checked_out = True
+        gatepass.date_time_exit = current_time
+        gatepass.save(update_fields=['checked_out', 'date_time_exit'])
+        # Corrected function call with all required arguments in the correct order
+        return build_response(gatepass, current_time, "Check Out time marked successfully", "check-out", gatepass_code, serializer)
+    
+    # Gatepass already used
+    if gatepass.checked_in:
+        return JsonResponse({
+            'status': False, 
+            'message': "Gatepass already used for check out & check in",
+            'type': "Expired",
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Wait if checked out recently
+    if gatepass.date_time_exit and (current_time - gatepass.date_time_exit) < timedelta(minutes=3):
+        wait_time = (gatepass.date_time_exit + timedelta(minutes=3) - current_time).seconds // 60
+        return JsonResponse({'status': False, 'message': f"Checked out recently, please wait {wait_time} minutes before checking in"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Handle check-in
+    gatepass.checked_in = True
+    gatepass.date_time_entry = current_time
+    gatepass.duration = current_time - gatepass.date_time_exit
+    gatepass.save(update_fields=['checked_in', 'date_time_entry','duration' ])
+    return build_response(gatepass, current_time, "Check In time marked successfully", "check-in", gatepass_code,serializer)
+
+def build_response(gatepass, current_time, message, action_type, gatepass_code,serializer):
+    profile = gatepass.request_from if "Staff" in gatepass_code else gatepass.student
+    return JsonResponse({
+        'status': True, 
+        'message': message,
+        f'{action_type}_time': current_time,
+        'type': action_type
+    }, status=status.HTTP_200_OK)
