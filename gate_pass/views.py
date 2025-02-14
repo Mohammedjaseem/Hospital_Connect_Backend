@@ -310,21 +310,17 @@ def single_pass_data(request):
         # Get gate passes for the staff
         gatepasses = HostelStaffGatePass.objects.get(pass_token=pass_token)
 
-        # Serialize gate passes with pagination
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
-
-        # Extract the paginated data
-        paginated_data = paginated_response.data  # Extracting data from the Response object
+        # Serialize single gate pass
+        serializer = HostelStaffGatePassSerializer(gatepasses)
 
         return Response({
             "status": True,
-            "message": "Gate passes retrieved successfully",
-            "data": paginated_data
-        }, status=paginated_response.status_code)  # Maintain the original status code
+            "message": "Gate pass retrieved successfully",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)  # Assuming a successful response
 
     except Exception as e:
         return handle_exception(e)
-    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
