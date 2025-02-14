@@ -7,4 +7,5 @@ urlpatterns = [
     path('mentor_approval_pendings/', views.mentor_approval_pendings, name="mentor_approval_pendings"),
     path('Hostel_gatepass/<str:token>/<str:decision>/', views.HostelStaffGatePassApprove, name="Hostel_gatepass_approve"),
     path('check_in_check_out_marker/', views.check_in_check_out_marker, name="check_in_check_out_marker"),
+    path('gate_pass_report/', views.gate_pass_report, name="gate_pass_report")
 ]
