@@ -90,7 +90,7 @@ def apply_staff_hostel_gate_pass(request):
             requesting_time=requesting_time,
             return_date=return_date,
             return_time=return_time,
-            pass_token=f"GatePass-{uuid.uuid4()}"
+            pass_token=f"GatePass-HostelStaff-{uuid.uuid4()}"
         )
 
         # Calculate total out duration
