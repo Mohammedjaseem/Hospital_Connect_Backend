@@ -626,7 +626,7 @@ def HostelStaffGatePassApprove(request, token, decision):
 def check_in_check_out_marker(request):
     gatepass_code = request.GET.get('unique_id', None)
     if not gatepass_code:
-        return JsonResponse({'status': False, 'message': 'Gatepass code is required'}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'status': False, 'message': 'Gatepass Uniquecode is required'}, status=status.HTTP_400_BAD_REQUEST)
     
     # Determine the type based on gatepass_code and set model and serializer accordingly
     model, serializer = (HostelStaffGatePass, HostelStaffGatePassSerializer)
@@ -679,7 +679,6 @@ def  handle_check_in_out(gatepass, current_time, gatepass_code,serializer):
     return build_response(gatepass, current_time, "Check In time marked successfully", "check-in", gatepass_code,serializer)
 
 def build_response(gatepass, current_time, message, action_type, gatepass_code,serializer):
-    profile = gatepass.request_from if "Staff" in gatepass_code else gatepass.student
     return JsonResponse({
         'status': True, 
         'message': message,
