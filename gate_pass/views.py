@@ -279,20 +279,22 @@ def get_my_pass_list(request):
 
         # Get gate passes for the staff
         gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
-        # gatepasses = HostelStaffGatePass.objects.all()
 
         # Serialize gate passes with pagination
-        paginated_gatepasses = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
-        
-        
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
+
+        # Extract the paginated data
+        paginated_data = paginated_response.data  # Extracting data from the Response object
+
         return Response({
             "status": True,
             "message": "Gate passes retrieved successfully",
-            "data": paginated_gatepasses
-        })
-    
+            "data": paginated_data
+        }, status=paginated_response.status_code)  # Maintain the original status code
+
     except Exception as e:
         return handle_exception(e)
+
 
 
 
