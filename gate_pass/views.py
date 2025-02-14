@@ -19,6 +19,7 @@ import os
 import boto3
 import pyqrcode
 from botocore.exceptions import NoCredentialsError, ClientError
+from utils.paginator import paginate_and_serialize
 
 
 @api_view(['POST'])
@@ -277,16 +278,13 @@ def get_my_pass_list(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        # gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
-        gatepasses = HostelStaffGatePass.objects.all()
+        gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
+        # gatepasses = HostelStaffGatePass.objects.all()
 
-        # Serialize gate passes
-        serialized_gatepasses = HostelStaffGatePassSerializer(gatepasses, many=True).data
-
-        return Response({
-                "data": serialized_gatepasses,
-                "status": True,
-            }, status=status.HTTP_200_OK)
+        # Serialize gate passes with pagination
+        paginated_gatepasses = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
+        
+        return paginated_gatepasses
     except Exception as e:
         return handle_exception(e)
 
