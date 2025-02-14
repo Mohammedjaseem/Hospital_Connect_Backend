@@ -295,6 +295,36 @@ def get_my_pass_list(request):
     except Exception as e:
         return handle_exception(e)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def single_pass_data(request):
+    try:
+        pass_token = request.GET.get("pass_token", None)
+        
+        if pass_token is None:
+            return Response({
+                "status": False,
+                "message": "Pass token is required",
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get gate passes for the staff
+        gatepasses = HostelStaffGatePass.objects.get(pass_token=pass_token)
+
+        # Serialize gate passes with pagination
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
+
+        # Extract the paginated data
+        paginated_data = paginated_response.data  # Extracting data from the Response object
+
+        return Response({
+            "status": True,
+            "message": "Gate passes retrieved successfully",
+            "data": paginated_data
+        }, status=paginated_response.status_code)  # Maintain the original status code
+
+    except Exception as e:
+        return handle_exception(e)
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
