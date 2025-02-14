@@ -294,9 +294,34 @@ def get_my_pass_list(request):
 
     except Exception as e:
         return handle_exception(e)
+    
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def mentor_approval_pendings(request):
+    try:
+        
+        # Get staff profile
+        staff_profile = get_staff_profile(request)
 
+        # Get gate passes for the staff
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile)
 
+        # Serialize gate passes with pagination
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
+
+        # Extract the paginated data
+        paginated_data = paginated_response.data  # Extracting data from the Response object
+
+        return Response({
+            "status": True,
+            "message": "Gate passes retrieved successfully",
+            "data": paginated_data
+        }, status=paginated_response.status_code)  # Maintain the original status code
+
+    except Exception as e:
+        return handle_exception(e)
+        
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -405,7 +430,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": f"{staff_number}",
                 "type": "template",
                 "template": {
-                    "name": "hostel_staff_approved_pass",
+                    "name": "hotel_approved_staff_pass",
                     "language": {"code": "en"},
                     "components": [
                         {
