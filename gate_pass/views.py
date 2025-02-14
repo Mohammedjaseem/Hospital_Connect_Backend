@@ -633,6 +633,9 @@ def check_in_check_out_marker(request):
     
     try:
         gatepass = model.objects.get(pass_token=gatepass_code)
+        if not gatepass.mentor_updated:
+            return JsonResponse({'status': False, 'message': 'Mentor not updated'}, status=status.HTTP_400_BAD_REQUEST)
+        
     except model.DoesNotExist:
         return JsonResponse({'status': False, 'message': 'Invalid gatepass code'}, status=status.HTTP_404_NOT_FOUND)
 
