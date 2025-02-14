@@ -5,7 +5,7 @@ from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from .models import StaffProfile
-from .serializers import StaffProfileSerializer, TeachingStaffSerializer
+from .serializers import StaffProfileSerializer, AllStaffSerializer
 from utils.validate_required_fields import validate_required_fields
 from rest_framework.pagination import PageNumberPagination
 from utils.decorators import verify_tenant_user
@@ -161,14 +161,14 @@ class SearchStaffView(APIView):
             return Response({"error": f"Error searching staff: {str(e)}", "status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class GetTeachingStaffApiView(APIView):
+class GetAllStaffApiView(APIView):
     permission_classes = [IsAuthenticated,IsTenantUser]
 
     # @verify_tenant_user(is_hospital_admin=False)
     def get(self, request):
         try:
-            teaching_staff = StaffProfile.objects.filter(is_teaching_staff=True,is_active=True)
-            serializer = TeachingStaffSerializer(teaching_staff, many=True)
+            all_staffs = StaffProfile.objects.filter(is_active=True)
+            serializer = AllStaffSerializer(all_staffs, many=True)
             return Response({"data": serializer.data, "status": True}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Error retrieving teaching staff: {str(e)}", "status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
