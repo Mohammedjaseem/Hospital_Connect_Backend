@@ -1,4 +1,6 @@
-from django.core.paginator import PageNumberPagination
+
+from rest_framework.pagination import PageNumberPagination
+
 
 def paginate_and_serialize(queryset, request, serializer_class, page_size):
     paginator = PageNumberPagination()
