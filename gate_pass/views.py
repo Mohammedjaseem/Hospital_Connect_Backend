@@ -467,7 +467,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {
                                     "type": "image",
                                     "image": {
-                                        "link": f"{qr_code_url}"
+                                        "link": qr_code_url
                                     }
                                 }
                             ]
