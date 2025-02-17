@@ -435,7 +435,8 @@ def HostelStaffGatePassApprove(request, token, decision):
                 
                
 
-            qr_code_url = gate_pass.qr_code_url
+            # qr_code_url = gate_pass.qr_code_url
+            qr_code_url = "https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/GatePass/HostelStaff/qrCodes/H4JGyc36.png"
             tentant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
             mentor_department = str(gate_pass.mentor.department.name).strip()
@@ -466,7 +467,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {
                                     "type": "image",
                                     "image": {
-                                        "link": f"{gate_pass.qr_code_url}"
+                                        "link": f"{qr_code_url}"
                                     }
                                 }
                             ]
