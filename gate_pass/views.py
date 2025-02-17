@@ -271,7 +271,7 @@ def gate_pass_report(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
+# @permission_classes([IsAuthenticated]) 
 def get_my_pass_list(request):
     try:
         # Get staff profile
