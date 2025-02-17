@@ -331,7 +331,7 @@ def mentor_approval_pendings(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile)
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, mentor_updated=None)
 
         # Serialize gate passes with pagination
         paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
@@ -435,7 +435,8 @@ def HostelStaffGatePassApprove(request, token, decision):
                 
                
 
-            qr_code_url = gate_pass.qr_code_url
+            # qr_code_url = gate_pass.qr_code_url
+            qr_code_url = "https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/GatePass/HostelStaff/qrCodes/H4JGyc36.png"
             tentant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
             mentor_department = str(gate_pass.mentor.department.name).strip()
@@ -444,6 +445,7 @@ def HostelStaffGatePassApprove(request, token, decision):
             check_out_time = gate_pass.requesting_time.strftime('%I:%M %p')
             check_in_date = gate_pass.return_date.strftime('%d-%m-%Y')
             check_in_time = gate_pass.return_time.strftime('%I:%M %p')
+            purpose = gate_pass.purpose
             
             staff_number = gate_pass.staff.mobile.strip().replace(" ", "")
             if staff_number.startswith('+'):
@@ -456,7 +458,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": f"{staff_number}",
                 "type": "template",
                 "template": {
-                    "name": "hotel_approved_staff_pass",
+                    "name": "hostel_approved_pass_staff",
                     "language": {"code": "en"},
                     "components": [
                         {
@@ -465,7 +467,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {
                                     "type": "image",
                                     "image": {
-                                        "link": f"{gate_pass.qr_code_url}"
+                                        "link": qr_code_url
                                     }
                                 }
                             ]
@@ -504,6 +506,10 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {
                                     "type": "text",
                                     "text": check_in_time
+                                },
+                                {
+                                    "type": "text",
+                                    "text": purpose
                                 },
                             ]
                         }
@@ -554,6 +560,7 @@ def HostelStaffGatePassApprove(request, token, decision):
             check_in_time = gate_pass.return_time.strftime('%I:%M %p')
             purpose = gate_pass.purpose
             rejection_reason = reason
+            
             
             staff_number = gate_pass.staff.mobile.strip().replace(" ", "")
             if staff_number.startswith('+'):
@@ -628,6 +635,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 gate_pass.remarks = reason
                 gate_pass.mentor_updated = True
                 gate_pass.updated_on = datetime.now()
+                gate_pass.save()
                 
                 return Response(
                         {"message": "Gate pass Rejcted successfully", 
