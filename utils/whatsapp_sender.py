@@ -36,12 +36,9 @@ def send_whatsapp_message(request, passing_data, type, sent_to):
                 bill = WhatsAppBill()
                 bill.type=type
                 bill.sent_to=sent_to
+                bill.wa_response=response.text
                 bill.save()
-                return {
-                    "status": "success",
-                    "message": "Message sent successfully",
-                    "details": response.text,
-                }
+                return True
             except Exception as e:
                 print(f"Error updating bill: {e}")
             return True

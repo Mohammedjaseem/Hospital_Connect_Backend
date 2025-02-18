@@ -8,7 +8,7 @@ from .models import WhatsAppBill
 
 
 class WhatsAppBillAdmin(admin.ModelAdmin):
-    list_display = ('type', 'sent_to', 'send_on')
+    list_display = ('type', 'sent_to', 'send_on', 'wa_response')
     search_fields = ('type', 'sent_to')
     list_filter = ('send_on',)
     actions = ['export_as_pdf']

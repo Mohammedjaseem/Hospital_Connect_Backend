@@ -7,6 +7,7 @@ class WhatsAppBill(models.Model):
     type = models.CharField(max_length=100)
     sent_to = models.CharField(max_length=100)
     send_on = models.DateTimeField(auto_now_add=True)
+    wa_response = models.CharField(max_length=100, null=True, blank=True)
 
     # String representation of the model
     def __str__(self):

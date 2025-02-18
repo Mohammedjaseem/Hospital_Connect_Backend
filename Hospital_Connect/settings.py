@@ -50,7 +50,6 @@ SHARED_APPS = [
     'django_celery_results',
     'corsheaders',
     'custom_users',
-    'connect_bills',
 ]
 
 TENANT_APPS = [ 
@@ -58,6 +57,7 @@ TENANT_APPS = [
     'staff',
     'hostel',
     'gate_pass',
+    'connect_bills',
     ]
 
 INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_APPS]
