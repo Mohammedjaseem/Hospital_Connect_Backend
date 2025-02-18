@@ -401,7 +401,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 qr_image = Image.open(img_byte_arr).convert("RGB")
 
                 # Resize to meet WhatsApp's recommended dimensions
-                qr_image = qr_image.resize((1125, 600), Image.Resampling.BICUBIC)
+                qr_image = qr_image.resize((1125, 1125), Image.Resampling.BICUBIC)
 
                 # Save QR to a temporary file
                 local_qr_code_path = f'{gate_pass.gatepass_no}.png'
