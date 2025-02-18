@@ -50,7 +50,6 @@ SHARED_APPS = [
     'django_celery_results',
     'corsheaders',
     'custom_users',
-    'connect_bills',
 ]
 
 TENANT_APPS = [ 
