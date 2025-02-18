@@ -447,7 +447,47 @@ def HostelStaffGatePassApprove(request, token, decision):
             staff_number = gate_pass.staff.mobile.strip().replace(" ", "")
             if staff_number.startswith('+'):
                 staff_number = staff_number[1:]
+                
+                
 
+            
+            # # # WhatsApp message to Student parent
+            # data = {
+            #     "messaging_product": "whatsapp",
+            #     "to": str(staff_number),  
+            #     "type": "template",
+            #     "template": {
+            #         "name": "hostel_approved_pass_staff",
+            #         "language": {"code": "en"},
+            #         "components": [
+            #             {
+            #                 "type": "header",
+            #                 "parameters": [
+            #                     {
+            #                         "type": "image",
+            #                         "image": {
+            #                             "link": qr_code_url  
+            #                         }
+            #                     }
+            #                 ]
+            #             },
+            #             {
+            #                 "type": "body",
+            #                 "parameters": [
+            #                     {"type": "text", "text": tenant_name},  
+            #                     {"type": "text", "text": mentor_name},
+            #                     {"type": "text", "text": mentor_department},
+            #                     {"type": "text", "text": mentor_designation},
+            #                     {"type": "text", "text": check_out_date},
+            #                     {"type": "text", "text": check_out_time},
+            #                     {"type": "text", "text": check_in_date},
+            #                     {"type": "text", "text": check_in_time},
+            #                     {"type": "text", "text": purpose}
+            #                 ]
+            #             }
+            #         ]
+            #     }
+            # }
             
             # # WhatsApp message to Student parent
             data = {
@@ -455,7 +495,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": str(staff_number),  
                 "type": "template",
                 "template": {
-                    "name": "hostel_approved_pass_staff",
+                    "name": "qr_hostel_pass",
                     "language": {"code": "en"},
                     "components": [
                         {
@@ -473,14 +513,6 @@ def HostelStaffGatePassApprove(request, token, decision):
                             "type": "body",
                             "parameters": [
                                 {"type": "text", "text": tenant_name},  
-                                {"type": "text", "text": mentor_name},
-                                {"type": "text", "text": mentor_department},
-                                {"type": "text", "text": mentor_designation},
-                                {"type": "text", "text": check_out_date},
-                                {"type": "text", "text": check_out_time},
-                                {"type": "text", "text": check_in_date},
-                                {"type": "text", "text": check_in_time},
-                                {"type": "text", "text": purpose}
                             ]
                         }
                     ]
