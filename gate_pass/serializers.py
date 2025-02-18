@@ -4,6 +4,10 @@ from .models import HostelStaffGatePass
 class HostelStaffGatePassSerializer(serializers.ModelSerializer):
     staff_name = serializers.CharField(source="staff.name", read_only=True)
     mentor_name = serializers.CharField(source="mentor.name", read_only=True)
+    
+    staff_department = serializers.CharField(source="staff.department.name", read_only=True)
+    staff_designation = serializers.CharField(source="staff.designation.name", read_only=True)
+    staff_picture = serializers.SerializerMethodField()
 
     class Meta:
         model = HostelStaffGatePass
@@ -11,6 +15,9 @@ class HostelStaffGatePassSerializer(serializers.ModelSerializer):
             "id",
             "staff",
             "staff_name",
+            "staff_department",
+            "staff_designation",
+            "staff_picture",
             "requested_on",
             "purpose",
             "requesting_date",
@@ -33,3 +40,6 @@ class HostelStaffGatePassSerializer(serializers.ModelSerializer):
             "date_time_entry",
             "duration",
         ]
+        
+    def get_staff_picture(self, obj):
+        return obj.staff.profile_pic.url if obj.staff.profile_pic else None

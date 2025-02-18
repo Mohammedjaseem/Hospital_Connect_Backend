@@ -433,7 +433,8 @@ def HostelStaffGatePassApprove(request, token, decision):
                     os.remove(local_qr_code_path)
 
             
-            qr_code_url = gate_pass.qr_code_url
+            # qr_code_url = gate_pass.qr_code_url
+            qr_code_url = "https://www.bmw.in/content/dam/bmw/marketIN/bmw_in/all-models/m-series/M8-competition/m8-competition-coupe-header.jpg"
             tenant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
             mentor_department = str(gate_pass.mentor.department.name).strip()
