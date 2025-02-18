@@ -432,12 +432,9 @@ def HostelStaffGatePassApprove(request, token, decision):
                 if os.path.exists(local_qr_code_path):
                     os.remove(local_qr_code_path)
 
-                
-               
-
-            # qr_code_url = gate_pass.qr_code_url
-            qr_code_url = "https://hospitalconnectbucket.s3.ap-south-1.amazonaws.com/GatePass/HostelStaff/qrCodes/H4JGyc36.png"
-            tentant_name = "Mims"
+            
+            qr_code_url = gate_pass.qr_code_url
+            tenant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
             mentor_department = str(gate_pass.mentor.department.name).strip()
             mentor_designation = str(gate_pass.mentor.designation.name).strip()
@@ -455,7 +452,7 @@ def HostelStaffGatePassApprove(request, token, decision):
             # # WhatsApp message to Student parent
             data = {
                 "messaging_product": "whatsapp",
-                "to": f"{staff_number}",
+                "to": str(staff_number),  
                 "type": "template",
                 "template": {
                     "name": "hostel_approved_pass_staff",
@@ -467,7 +464,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {
                                     "type": "image",
                                     "image": {
-                                        "link": qr_code_url
+                                        "link": qr_code_url  
                                     }
                                 }
                             ]
@@ -475,42 +472,15 @@ def HostelStaffGatePassApprove(request, token, decision):
                         {
                             "type": "body",
                             "parameters": [
-                                {
-                                    "type": "text",
-                                    "text": tentant_name
-                                },
-                                {
-                                    "type": "text",
-                                    "text": mentor_name
-                                },
-                                {
-                                    "type": "text",
-                                    "text": mentor_department
-                                },
-                                {
-                                    "type": "text",
-                                    "text": mentor_designation
-                                },
-                                {
-                                    "type": "text",
-                                    "text": check_out_date
-                                },
-                                {
-                                    "type": "text",
-                                    "text": check_out_time
-                                },
-                                {
-                                    "type": "text",
-                                    "text": check_in_date
-                                },
-                                {
-                                    "type": "text",
-                                    "text": check_in_time
-                                },
-                                {
-                                    "type": "text",
-                                    "text": purpose
-                                },
+                                {"type": "text", "text": tenant_name},  
+                                {"type": "text", "text": mentor_name},
+                                {"type": "text", "text": mentor_department},
+                                {"type": "text", "text": mentor_designation},
+                                {"type": "text", "text": check_out_date},
+                                {"type": "text", "text": check_out_time},
+                                {"type": "text", "text": check_in_date},
+                                {"type": "text", "text": check_in_time},
+                                {"type": "text", "text": purpose}
                             ]
                         }
                     ]
@@ -519,13 +489,13 @@ def HostelStaffGatePassApprove(request, token, decision):
             
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
-            sent_to = staff_number
-            whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=sent_to)
+            whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=staff_number)
             
             if whatsapp_alert_to_staff == True:
                 return Response(
                         {"message": "Gate pass approved successfully", 
                         "notification_status": whatsapp_alert_to_staff, 
+                        "qr_code_url": qr_code_url,
                         "wa_number": sent_to,
                         "status": True},
                         status=status.HTTP_200_OK
