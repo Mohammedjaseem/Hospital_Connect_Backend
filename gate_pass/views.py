@@ -433,8 +433,7 @@ def HostelStaffGatePassApprove(request, token, decision):
                     os.remove(local_qr_code_path)
 
             
-            # qr_code_url = gate_pass.qr_code_url
-            qr_code_url = "https://www.bmw.in/content/dam/bmw/marketIN/bmw_in/all-models/m-series/M8-competition/m8-competition-coupe-header.jpg"
+            qr_code_url = gate_pass.qr_code_url
             tenant_name = "Mims"
             mentor_name = str(gate_pass.mentor.name).strip()
             mentor_department = str(gate_pass.mentor.department.name).strip()
@@ -456,9 +455,20 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": str(staff_number),  
                 "type": "template",
                 "template": {
-                    "name": "mims_hostel_approve",
+                    "name": "hostel_approved_pass_staff",
                     "language": {"code": "en"},
                     "components": [
+                        {
+                            "type": "header",
+                            "parameters": [
+                                {
+                                    "type": "image",
+                                    "image": {
+                                        "link": qr_code_url  
+                                    }
+                                }
+                            ]
+                        },
                         {
                             "type": "body",
                             "parameters": [
@@ -472,21 +482,11 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {"type": "text", "text": check_in_time},
                                 {"type": "text", "text": purpose}
                             ]
-                        },
-                        {
-                            "type": "button",
-                            "index": "0",
-                            "sub_type": "url",
-                            "parameters": [
-                                {
-                                    "type": "text",
-                                    "text": str(gate_pass.pass_token)
-                                },
-                            ]
                         }
                     ]
                 }
             }
+            
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
             whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=staff_number)
