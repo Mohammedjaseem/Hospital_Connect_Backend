@@ -456,20 +456,9 @@ def HostelStaffGatePassApprove(request, token, decision):
                 "to": str(staff_number),  
                 "type": "template",
                 "template": {
-                    "name": "hostel_approved_pass_staff",
+                    "name": "mims_hostel_approve",
                     "language": {"code": "en"},
                     "components": [
-                        {
-                            "type": "header",
-                            "parameters": [
-                                {
-                                    "type": "image",
-                                    "image": {
-                                        "link": qr_code_url  
-                                    }
-                                }
-                            ]
-                        },
                         {
                             "type": "body",
                             "parameters": [
@@ -483,11 +472,21 @@ def HostelStaffGatePassApprove(request, token, decision):
                                 {"type": "text", "text": check_in_time},
                                 {"type": "text", "text": purpose}
                             ]
+                        },
+                        {
+                            "type": "button",
+                            "index": "0",
+                            "sub_type": "url",
+                            "parameters": [
+                                {
+                                    "type": "text",
+                                    "text": str(gate_pass.pass_token)
+                                },
+                            ]
                         }
                     ]
                 }
             }
-            
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
             whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=staff_number)
