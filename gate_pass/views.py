@@ -461,52 +461,25 @@ def HostelStaffGatePassApprove(request, token, decision):
 
             
             # # # WhatsApp message to Student parent
-            data = {
-                "messaging_product": "whatsapp",
-                "to": str(staff_number),  
-                "type": "template",
-                "template": {
-                    "name": "hostel_approved_pass_staff",
-                    "language": {"code": "en"},
-                    "components": [
-                        {
-                            "type": "header",
-                            "parameters": [
-                                {
-                                    "type": "image",
-                                    "image": {
-                                        "link": qr_code_url  
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "type": "body",
-                            "parameters": [
-                                {"type": "text", "text": tenant_name},  
-                                {"type": "text", "text": mentor_name},
-                                {"type": "text", "text": mentor_department},
-                                {"type": "text", "text": mentor_designation},
-                                {"type": "text", "text": check_out_date},
-                                {"type": "text", "text": check_out_time},
-                                {"type": "text", "text": check_in_date},
-                                {"type": "text", "text": check_in_time},
-                                {"type": "text", "text": purpose}
-                            ]
-                        }
-                    ]
-                }
-            }
-            
-            # # WhatsApp message to Student parent
             # data = {
             #     "messaging_product": "whatsapp",
-            #     "to": staff_number,  
+            #     "to": str(staff_number),  
             #     "type": "template",
             #     "template": {
-            #         "name": "no_qr_template",
+            #         "name": "hostel_approved_pass_staff",
             #         "language": {"code": "en"},
             #         "components": [
+            #             {
+            #                 "type": "header",
+            #                 "parameters": [
+            #                     {
+            #                         "type": "image",
+            #                         "image": {
+            #                             "link": qr_code_url  
+            #                         }
+            #                     }
+            #                 ]
+            #             },
             #             {
             #                 "type": "body",
             #                 "parameters": [
@@ -524,6 +497,33 @@ def HostelStaffGatePassApprove(request, token, decision):
             #         ]
             #     }
             # }
+            
+            # # WhatsApp message to Student parent
+            data = {
+                "messaging_product": "whatsapp",
+                "to": staff_number,  
+                "type": "template",
+                "template": {
+                    "name": "no_qr_template",
+                    "language": {"code": "en"},
+                    "components": [
+                        {
+                            "type": "body",
+                            "parameters": [
+                                {"type": "text", "text": tenant_name},  
+                                {"type": "text", "text": mentor_name},
+                                {"type": "text", "text": mentor_department},
+                                {"type": "text", "text": mentor_designation},
+                                {"type": "text", "text": check_out_date},
+                                {"type": "text", "text": check_out_time},
+                                {"type": "text", "text": check_in_date},
+                                {"type": "text", "text": check_in_time},
+                                {"type": "text", "text": purpose}
+                            ]
+                        }
+                    ]
+                }
+            }
             
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
