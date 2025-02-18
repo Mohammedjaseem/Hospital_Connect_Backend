@@ -495,8 +495,6 @@ def HostelStaffGatePassApprove(request, token, decision):
                 return Response(
                         {"message": "Gate pass approved successfully", 
                         "notification_status": whatsapp_alert_to_staff, 
-                        "qr_code_url": qr_code_url,
-                        "wa_number": staff_number,
                         "status": True},
                         status=status.HTTP_200_OK
                 )
