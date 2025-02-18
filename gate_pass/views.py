@@ -20,6 +20,10 @@ import boto3
 import pyqrcode
 from botocore.exceptions import NoCredentialsError, ClientError
 from utils.paginator import paginate_and_serialize
+import pyqrcode
+from PIL import Image
+import io
+import requests
 
 
 @api_view(['POST'])
@@ -385,23 +389,42 @@ def HostelStaffGatePassApprove(request, token, decision):
 
             # Generate QR code
             try:
+                # Generate QR code
                 qr_code = pyqrcode.create(f"{gate_pass.pass_token}")
-            except Exception as e:
-                return Response({
-                "message": str(f"Error generating QR code: {e}"),
-                "status": False,
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Save QR code to a local file temporarily
-            local_qr_code_path = f'{gate_pass.gatepass_no}.png'
-            try:
-                qr_code.png(local_qr_code_path, scale=6)
+                # Create an in-memory file to save QR
+                img_byte_arr = io.BytesIO()
+                qr_code.png(img_byte_arr, scale=10)  # Increased scale for better resolution
+
+                # Convert to RGB format using PIL
+                img_byte_arr.seek(0)
+                qr_image = Image.open(img_byte_arr).convert("RGB")
+
+                # Resize to meet WhatsApp's recommended dimensions
+                qr_image = qr_image.resize((1125, 600), Image.ANTIALIAS)
+
+                # Save QR to a temporary file
+                local_qr_code_path = f'{gate_pass.gatepass_no}.png'
+                qr_image.save(local_qr_code_path, format="PNG")
+
+                # Upload QR to a public storage (e.g., S3, Firebase, or your own media server)
+                upload_url = "YOUR_UPLOAD_ENDPOINT"  # Replace with actual upload URL
+                files = {'file': open(local_qr_code_path, 'rb')}
+                response = requests.post(upload_url, files=files)
+
+                if response.status_code == 200:
+                    qr_code_url = response.json().get("url")  # Adjust based on response format
+                else:
+                    return Response({
+                        "message": "Error uploading QR code",
+                        "status": False
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
             except Exception as e:
-                print(f"Error saving QR code locally: {e}")
-                # Handle the error or exit the function if saving the QR code fails
                 return Response({
-                "message": str(f'Error saving QR code locally: {e}'),
-                "status": False,
+                    "message": str(f"Error generating QR code: {e}"),
+                    "status": False,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -452,52 +475,25 @@ def HostelStaffGatePassApprove(request, token, decision):
 
             
             # # # WhatsApp message to Student parent
-            # data = {
-            #     "messaging_product": "whatsapp",
-            #     "to": str(staff_number),  
-            #     "type": "template",
-            #     "template": {
-            #         "name": "hostel_approved_pass_staff",
-            #         "language": {"code": "en"},
-            #         "components": [
-            #             {
-            #                 "type": "header",
-            #                 "parameters": [
-            #                     {
-            #                         "type": "image",
-            #                         "image": {
-            #                             "link": qr_code_url  
-            #                         }
-            #                     }
-            #                 ]
-            #             },
-            #             {
-            #                 "type": "body",
-            #                 "parameters": [
-            #                     {"type": "text", "text": tenant_name},  
-            #                     {"type": "text", "text": mentor_name},
-            #                     {"type": "text", "text": mentor_department},
-            #                     {"type": "text", "text": mentor_designation},
-            #                     {"type": "text", "text": check_out_date},
-            #                     {"type": "text", "text": check_out_time},
-            #                     {"type": "text", "text": check_in_date},
-            #                     {"type": "text", "text": check_in_time},
-            #                     {"type": "text", "text": purpose}
-            #                 ]
-            #             }
-            #         ]
-            #     }
-            # }
-            
-            # # WhatsApp message to Student parent
             data = {
                 "messaging_product": "whatsapp",
-                "to": staff_number,  
+                "to": str(staff_number),  
                 "type": "template",
                 "template": {
-                    "name": "no_qr_template",
+                    "name": "hostel_approved_pass_staff",
                     "language": {"code": "en"},
                     "components": [
+                        {
+                            "type": "header",
+                            "parameters": [
+                                {
+                                    "type": "image",
+                                    "image": {
+                                        "link": qr_code_url  
+                                    }
+                                }
+                            ]
+                        },
                         {
                             "type": "body",
                             "parameters": [
@@ -515,6 +511,33 @@ def HostelStaffGatePassApprove(request, token, decision):
                     ]
                 }
             }
+            
+            # # WhatsApp message to Student parent
+            # data = {
+            #     "messaging_product": "whatsapp",
+            #     "to": staff_number,  
+            #     "type": "template",
+            #     "template": {
+            #         "name": "no_qr_template",
+            #         "language": {"code": "en"},
+            #         "components": [
+            #             {
+            #                 "type": "body",
+            #                 "parameters": [
+            #                     {"type": "text", "text": tenant_name},  
+            #                     {"type": "text", "text": mentor_name},
+            #                     {"type": "text", "text": mentor_department},
+            #                     {"type": "text", "text": mentor_designation},
+            #                     {"type": "text", "text": check_out_date},
+            #                     {"type": "text", "text": check_out_time},
+            #                     {"type": "text", "text": check_in_date},
+            #                     {"type": "text", "text": check_in_time},
+            #                     {"type": "text", "text": purpose}
+            #                 ]
+            #             }
+            #         ]
+            #     }
+            # }
             
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
