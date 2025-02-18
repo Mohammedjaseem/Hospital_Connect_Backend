@@ -42,4 +42,4 @@ class HostelStaffGatePassSerializer(serializers.ModelSerializer):
         ]
         
     def get_staff_picture(self, obj):
-        return obj.staff.profile_pic.url if obj.staff.profile_pic else None
+        return obj.staff.picture.url if obj.staff.picture else None
