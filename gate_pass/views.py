@@ -401,26 +401,11 @@ def HostelStaffGatePassApprove(request, token, decision):
                 qr_image = Image.open(img_byte_arr).convert("RGB")
 
                 # Resize to meet WhatsApp's recommended dimensions
-                qr_image = qr_image.resize((1125, 600), Image.LANCZOS)  # Updated resize method
+                qr_image = qr_image.resize((1125, 600), Image.ANTIALIAS)
 
                 # Save QR to a temporary file
                 local_qr_code_path = f'{gate_pass.gatepass_no}.png'
                 qr_image.save(local_qr_code_path, format="PNG")
-
-                # Upload QR to a public storage (e.g., S3, Firebase, or your own media server)
-                upload_url = "YOUR_UPLOAD_ENDPOINT"  # Replace with actual upload URL
-                files = {'file': open(local_qr_code_path, 'rb')}
-                response = requests.post(upload_url, files=files)
-
-                if response.status_code == 200:
-                    qr_code_url = response.json().get("url")  # Adjust based on response format
-                else:
-                    return Response({
-                        "message": "Error uploading QR code",
-                        "status": False
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
             except Exception as e:
                 return Response({
