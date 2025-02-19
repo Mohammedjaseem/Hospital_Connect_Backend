@@ -25,6 +25,10 @@ from PIL import Image
 import io
 from collections import Counter
 import requests
+from utils.send_email import send_email
+from django.template.loader import render_to_string
+from django.db import connection
+            
 
 
 @api_view(['POST'])
@@ -172,7 +176,57 @@ def apply_staff_hostel_gate_pass(request):
 
         # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
-        print("notification_status", notification_status)
+        org = request.user.org
+        org_banner_url = org.email_banner.url
+        
+
+        # # Mailing to mentor for gate_pass request
+        subject = f"{staff_profile.name} Has requested for Gate Pass | ID: #{gate_pass.id}"
+        message = render_to_string('hostel_pass/MailToMentor.html', {
+            'staff_name': staff_profile.name,
+            'staff_photo' : request.build_absolute_uri(staff_profile.picture.url),
+            'department': staff_profile.department.name,
+            'designation': staff_profile.designation.name,
+            'hostel': staff_profile.hostel.name,
+            'staff_req_date': requesting_date,
+            'staff_req_time': check_out_time,
+            'retrun_date': return_date,
+            'retrun_time': check_in_time,
+            'purpose': purpose,
+            'org_banner_url' : org_banner_url,
+            'pass_token': gate_pass.pass_token,
+        })
+        
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        
+        
+        if staff_profile.hostel.incharge:
+            recipient = staff_profile.hostel.incharge.user.email
+        else:
+            message = "Hostel Inscharge not found !"
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+            request_status = False
+            return Response({
+            "message": message, 
+            "status": False,
+            "mailed_to_mentor": False,
+            "mailed_to_student": False,
+        }, status=status_code)
+            
+        
+        org=request.user.organization
+        mailed_to_mentor_success = mailed_to_mentor = send_email(org, subject, message, recipient, cc_emails)
+
+        if mailed_to_mentor == False:
+            return Response({
+            "message": "Mentor Mail system failed !", 
+            "status": False,
+            "mailed_to_mentor": mailed_to_mentor_success,
+            "mailed_to_student": False,
+        }, status=status_code)
+        
+    
+
         if notification_status == True:
             return Response(
                 {"message": "Gate pass request sent successfully", 
