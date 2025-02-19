@@ -99,13 +99,10 @@ class StaffProfile(models.Model, ImageCompressorMixin):
 
 # class ReviewType(models.Model):
 #     """Defines the type of review (Teaching, Non-Teaching, Clinical)"""
-#     CATEGORY_CHOICES = [
-#         ("non_teaching", "Non-Teaching Staff Review"),
-#         ("teaching", "Teaching Staff Review"),
-#         ("clinical", "Clinical Staff Review"),
-#     ]
+ 
 #     name = models.CharField(max_length=100, unique=True, db_index=True)
 #     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, db_index=True)
+
 
 #     def __str__(self):
 #         return self.name

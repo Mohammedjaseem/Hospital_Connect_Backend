@@ -57,6 +57,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'id',
             'uuid',
             'email',
+            'name',
             'user_type',
             'is_verified',
             'is_active',
