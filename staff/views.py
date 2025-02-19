@@ -97,7 +97,7 @@ class StaffProfileView(APIView):
         try:
             data = request.data.copy()
             validate_required_fields(data,['name', 'dob', 'mobile', 'department', 'designation', 'picture'])
-
+            
             data['user'] = request.user.id
             data['is_active']=True
             serializer = StaffProfileSerializer(data=data)
@@ -111,7 +111,8 @@ class StaffProfileView(APIView):
                         "status": False
                     }, status=status.HTTP_400_BAD_REQUEST)
                 raise e
-
+            request.user.name = data['name'] 
+            request.user.save()
             return Response({
                 "message": "Staff added successfully",
                 "staff_profile": StaffProfileSerializer(staff).data,
