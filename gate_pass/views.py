@@ -40,18 +40,18 @@ def apply_staff_hostel_gate_pass(request):
         if not staff_profile.is_hosteller:
             return Response({"message": "You are not a hostel staff", "status": False}, status=status.HTTP_400_BAD_REQUEST)
 
-        # five_hours_ago = timezone.now() - timedelta(hours=5)
-        # latest_gate_pass = HostelStaffGatePass.objects.filter(
-        #     staff=staff_profile, requested_on__gte=five_hours_ago
-        # ).only('requested_on').first()
+        five_hours_ago = timezone.now() - timedelta(hours=5)
+        latest_gate_pass = HostelStaffGatePass.objects.filter(
+            staff=staff_profile, requested_on__gte=five_hours_ago
+        ).only('requested_on').first()
 
-        # if latest_gate_pass:
-        #     time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
-        #     local_time_left = time_left.astimezone(timezone.get_current_timezone())
-        #     return Response(
-        #         {"message": f"You have already requested a gate pass. Try again after {int(local_time_left.total_seconds() // 3600):02}:{int((local_time_left.total_seconds() % 3600) // 60):02}.", "status": False},
-        #         status=status.HTTP_400_BAD_REQUEST
-        #     )
+        if latest_gate_pass:
+            time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
+            local_time_left = time_left.astimezone(timezone.get_current_timezone())
+            return Response(
+                {"message": f"You have already requested a gate pass. Try again after {int(local_time_left.total_seconds() // 3600):02}:{int((local_time_left.total_seconds() % 3600) // 60):02}.", "status": False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         required_fields = ['purpose', 'requesting_date', 'requesting_time', 'return_date', 'return_time']
         missing_fields = [field for field in required_fields if not request.data.get(field)]
