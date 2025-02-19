@@ -14,8 +14,8 @@ def send_email(self, subject, message, recipient, cc_emails=None):
     Automatically retries up to 3 times if an error occurs.
     """
     try:
-        print(f"📩 Preparing email for {recipient}")  
-        logger.info(f"📩 Preparing email for {recipient}")
+        # print(f"📩 Preparing email for {recipient}")  
+        # logger.info(f"📩 Preparing email for {recipient}")
 
         # Use EmailMultiAlternatives to support HTML and plaintext emails
         email = EmailMultiAlternatives(
@@ -30,13 +30,13 @@ def send_email(self, subject, message, recipient, cc_emails=None):
 
         email.attach_alternative(message, "text/html")  # Attach HTML message
 
-        print(f"📤 Sending email to {recipient}...")  
-        logger.info(f"📤 Sending email to {recipient}...")
+        # print(f"📤 Sending email to {recipient}...")  
+        # logger.info(f"📤 Sending email to {recipient}...")
 
         email.send()
 
-        print(f"✅ Email successfully sent to {recipient}")  
-        logger.info(f"✅ Email successfully sent to {recipient}")
+        # print(f"✅ Email successfully sent to {recipient}")  
+        # logger.info(f"✅ Email successfully sent to {recipient}")
 
         # # ✅ Log successful email sending
         # EmailLog.objects.create(
