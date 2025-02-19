@@ -135,7 +135,7 @@ def apply_staff_hostel_gate_pass(request):
         
         mailed_to_mentor = send_email(subject, message, mentor.user.email)
         
-        if notification_status or mailed_to_mentor:
+        if notification_status:
             return Response({
                 "message": "Gate pass request sent successfully", "status": True,
                 "notification_status": notification_status, "wa_number": mentor_number
