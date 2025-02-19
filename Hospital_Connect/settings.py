@@ -39,7 +39,7 @@ ALLOWED_HOSTS = ['*']
 SHARED_APPS = [
     'django_tenants',
     'app',
-    'jazzmin',
+    # 'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.sessions',
