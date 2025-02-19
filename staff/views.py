@@ -18,7 +18,7 @@ from utils.custom_permissions import IsTenantUser, IsHospitalAdmin
 class StaffProfilePagination(PageNumberPagination):
     page_size = 20  # Number of results per page
     page_size_query_param = 'page_size'  # Allow the client to override this via a query parameter
-    max_page_size = 100  # Maximum results allowed per page
+    max_page_size = 100  # Maximum results allowed per pages
 
 
 class StaffProfileView(APIView):
