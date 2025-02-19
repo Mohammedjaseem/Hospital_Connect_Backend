@@ -245,9 +245,10 @@ table, td { color: #000000; } #u_body a { color: #0000ee; text-decoration: under
                   <p style="margin: 5px 0;"><strong>Hostel:</strong> {{hostel}}</p>
                   <h2 style="font-size: 18px; color: #333333; margin-top: 20px; margin-bottom: 10px;">Purpose:</h2>
                   <p style="margin: 0 0 0 10%;">{{purpose}}</p>
-                  <h2 style="font-size: 18px; color: #333333; margin-top: 20px; margin-bottom: 10px;">Requested Check-Out &amp; In Times:</h2>
-                  <p style="margin: 5px 0;"><strong>Check Out:</strong> {{ staff_req_date }} | {{ staff_req_time }}</p>
-                  <p style="margin: 5px 0;"><strong>Check In:</strong> {{ retrun_date }} | {{ retrun_time }}</p>
+                  <h2 style="font-size: 18px; color: #333333; margin-top: 20px; margin-bottom: 10px;">Check-Out &amp; In Times:</h2>
+                  <p style="margin: 5px 0;"><strong>Check Out:</strong> {{ staff_req_date }} | {{ staff_req_time }}</p> 
+                  <p style="margin: 5px 0;"><strong>Check In:</strong> {{ retrun_date }} | {{ retrun_time }}</p><br>
+                  <p style="margin: 5px 0;"><strong>Duration:</strong> {{ total_out_duration }}</p>
               </td>
           </tr>
       </table>

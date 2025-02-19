@@ -30,161 +30,93 @@ from django.template.loader import render_to_string
 from django.db import connection
             
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def apply_staff_hostel_gate_pass(request):
     try:
         staff_profile = get_staff_profile(request)
 
-        # Ensure user is hostel staff
         if not staff_profile.is_hosteller:
-            return Response(
-                {"message": "You are not a hostel staff"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"message": "You are not a hostel staff", "status": False}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check for a gate pass requested within the last 5 hours
         five_hours_ago = timezone.now() - timedelta(hours=5)
         latest_gate_pass = HostelStaffGatePass.objects.filter(
             staff=staff_profile, requested_on__gte=five_hours_ago
         ).only('requested_on').first()
 
-        # if latest_gate_pass:
-        #     time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
-        #     hours, minutes = divmod(time_left.total_seconds(), 3600)
-        #     return Response(
-        #         {
-        #             "message": f"You have already requested a gate pass within the last 5 hours. Please try after {int(hours):02}:{int(minutes // 60):02}.",
-        #             "status": False,
-        #         },
-        #         status=status.HTTP_400_BAD_REQUEST
-        #     )
-
-        # Required fields validation
-        required_fields = ['purpose', 'requesting_date', 'requesting_time', 'return_date', 'return_time']
-        missing_fields = [field for field in required_fields if not request.data.get(field)]
-        if missing_fields:
+        if latest_gate_pass:
+            time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
             return Response(
-                {"message": f"Missing required fields: {', '.join(missing_fields)}"},
+                {"message": f"You have already requested a gate pass. Try again after {int(time_left.total_seconds() // 3600):02}:{int((time_left.total_seconds() % 3600) // 60):02}.", "status": False},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Extract data
+        required_fields = ['purpose', 'requesting_date', 'requesting_time', 'return_date', 'return_time']
+        missing_fields = [field for field in required_fields if not request.data.get(field)]
+        if missing_fields:
+            return Response({"message": f"Missing required fields: {', '.join(missing_fields)}", "status": False}, status=status.HTTP_400_BAD_REQUEST)
+
         purpose = request.data['purpose']
         requesting_date = request.data['requesting_date']
-        requesting_time = request.data['requesting_time']
+        requesting_time = datetime.strptime(request.data['requesting_time'], '%I:%M %p').strftime('%H:%M:%S')
         return_date = request.data['return_date']
-        return_time = request.data['return_time']
-
-        # Convert times from 12-hour format to 24-hour format
-        requesting_time = datetime.strptime(requesting_time, '%I:%M %p').strftime('%H:%M:%S')
-        return_time = datetime.strptime(return_time, '%I:%M %p').strftime('%H:%M:%S')
-
-        # Get mentor details
+        return_time = datetime.strptime(request.data['return_time'], '%I:%M %p').strftime('%H:%M:%S')
+        
         mentor = staff_profile.hostel.incharge
-        mentor_number = mentor.mobile.strip().replace(" ", "")
-
-        # Remove leading '+' if present
-        if mentor_number.startswith('+'):
-            mentor_number = mentor_number[1:]
-            
-
-        # Create gate pass
+        if not mentor:
+            return Response({"message": "Hostel Incharge not found!", "status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        mentor_number = mentor.mobile.strip().replace(" ", "").lstrip('+')
+        
         gate_pass = HostelStaffGatePass.objects.create(
-            staff=staff_profile,
-            mentor=mentor,
-            purpose=purpose,
-            requesting_date=requesting_date,
-            requesting_time=requesting_time,
-            return_date=return_date,
-            return_time=return_time,
+            staff=staff_profile, mentor=mentor, purpose=purpose,
+            requesting_date=requesting_date, requesting_time=requesting_time,
+            return_date=return_date, return_time=return_time,
             pass_token=f"GatePass-HostelStaff-{uuid.uuid4()}"
         )
-
-        # Calculate total out duration
-        total_seconds = (datetime.strptime(f"{return_date} {return_time}", "%Y-%m-%d %H:%M:%S") - 
-                         datetime.strptime(f"{requesting_date} {requesting_time}", "%Y-%m-%d %H:%M:%S")).total_seconds()
-
-        days, remainder = divmod(total_seconds, 86400)  # 86400 seconds in a day
-        hours, remainder = divmod(remainder, 3600)  # 3600 seconds in an hour
-        minutes, _ = divmod(remainder, 60)  # 60 seconds in a minute
-
-        if days > 0:
-            total_out_duration = f"{int(days)} day{'s' if days > 1 else ''} {int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}"
-        else:
-            total_out_duration = f"{int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}"
-
-        # Convert times to 12-hour format with AM/PM
+        
+        total_seconds = (
+            datetime.strptime(f"{return_date} {return_time}", "%Y-%m-%d %H:%M:%S") - 
+            datetime.strptime(f"{requesting_date} {requesting_time}", "%Y-%m-%d %H:%M:%S")
+        ).total_seconds()
+        
+        days, remainder = divmod(total_seconds, 86400)
+        hours, minutes = divmod(remainder, 3600)
+        minutes //= 60
+        total_out_duration = f"{int(days)} day{'s' if days > 1 else ''} {int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}" if days else f"{int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}"
+        
         check_out_time = datetime.strptime(requesting_time, "%H:%M:%S").strftime("%I:%M %p")
         check_in_time = datetime.strptime(return_time, "%H:%M:%S").strftime("%I:%M %p")
-
-        # WhatsApp notification data
-        tenant_name = "Mims"
+        
         whatsapp_data = {
-            "messaging_product": "whatsapp",
-            "to": f"{mentor_number}",
-            "type": "template",
+            "messaging_product": "whatsapp", "to": mentor_number, "type": "template",
             "template": {
-                "name": "staff_hostel_pass_request",
-                "language": {"code": "en"},
-                "components": [
-                    {"type": "header", "parameters": [{"type": "text", "text": tenant_name}]},
-                    {
-                        "type": "body",
-                        "parameters": [
-                            {"type": "text", "text": staff_profile.name},
-                            {"type": "text", "text": staff_profile.department.name},
-                            {"type": "text", "text": staff_profile.designation.name},
-                            {"type": "text", "text": staff_profile.emp_id},
-                            {"type": "text", "text": requesting_date},
-                            {"type": "text", "text": check_out_time},
-                            {"type": "text", "text": return_date},
-                            {"type": "text", "text": check_in_time},
-                            {"type": "text", "text": total_out_duration},
-                            {"type": "text", "text": purpose},
-                        ]
-                    },
-                    
-                        {
-                            "type": "button",
-                            "index": "0",
-                            "sub_type": "url",
-                            "parameters": [
-                                {
-                                    "type": "text",
-                                    "text": str(gate_pass.pass_token)
-                                },
-                            ]
-                        },
-                        {
-                            "type": "button",
-                            "index": "1",
-                            "sub_type": "url",
-                            "parameters": [
-                                {
-                                    "type": "text",
-                                    "text": str(gate_pass.pass_token)
-                                },
-                            ]
-                        },
+                "name": "staff_hostel_pass_request", "language": {"code": "en"}, "components": [
+                    {"type": "header", "parameters": [{"type": "text", "text": "Mims"}]},
+                    {"type": "body", "parameters": [
+                        {"type": "text", "text": staff_profile.name},
+                        {"type": "text", "text": staff_profile.department.name},
+                        {"type": "text", "text": staff_profile.designation.name},
+                        {"type": "text", "text": staff_profile.emp_id},
+                        {"type": "text", "text": requesting_date},
+                        {"type": "text", "text": check_out_time},
+                        {"type": "text", "text": return_date},
+                        {"type": "text", "text": check_in_time},
+                        {"type": "text", "text": total_out_duration},
+                        {"type": "text", "text": purpose},
+                    ]},
+                    {"type": "button", "index": "0", "sub_type": "url", "parameters": [{"type": "text", "text": str(gate_pass.pass_token)}]},
                 ]
             }
         }
         
-        # mentor_number = 918086500023
-
-        # Send WhatsApp notification
         notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
-        org = request.user.org
-        org_banner_url = org.email_banner.url
         
-
-        # # Mailing to mentor for gate_pass request
+        org_banner_url = request.user.org.email_banner.url
         subject = f"{staff_profile.name} Has requested for Gate Pass | ID: #{gate_pass.id}"
         message = render_to_string('hostel_pass/MailToMentor.html', {
             'staff_name': staff_profile.name,
-            'staff_photo' : request.build_absolute_uri(staff_profile.picture.url),
+            'staff_photo': request.build_absolute_uri(staff_profile.picture.url),
             'department': staff_profile.department.name,
             'designation': staff_profile.designation.name,
             'hostel': staff_profile.hostel.name,
@@ -192,57 +124,25 @@ def apply_staff_hostel_gate_pass(request):
             'staff_req_time': check_out_time,
             'retrun_date': return_date,
             'retrun_time': check_in_time,
+            'total_out_duration': total_out_duration,
             'purpose': purpose,
-            'org_banner_url' : org_banner_url,
+            'org_banner_url': org_banner_url,
             'pass_token': gate_pass.pass_token,
         })
         
-        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        mailed_to_mentor = send_email(subject, message, mentor.user.email)
         
-        
-        if staff_profile.hostel.incharge:
-            recipient = staff_profile.hostel.incharge.user.email
-        else:
-            message = "Hostel Inscharge not found !"
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            request_status = False
+        if notification_status or mailed_to_mentor:
             return Response({
-            "message": message, 
-            "status": False,
-            "mailed_to_mentor": False,
-            "mailed_to_student": False,
-        }, status=status_code)
-            
-        mailed_to_mentor_success = mailed_to_mentor = send_email(subject, message, recipient, cc_emails=None)
-
-        if mailed_to_mentor == False:
-            return Response({
-            "message": "Mentor Mail system failed !", 
-            "status": False,
-            "mailed_to_mentor": mailed_to_mentor_success,
-            "mailed_to_student": False,
-        }, status=status_code)
+                "message": "Gate pass request sent successfully", "status": True,
+                "notification_status": notification_status, "wa_number": mentor_number
+            }, status=status.HTTP_200_OK)
         
-    
-
-        if notification_status == True:
-            return Response(
-                {"message": "Gate pass request sent successfully", 
-                 "notification_status": notification_status, 
-                 "wa_number": mentor_number,
-                 "status": True},
-                status=status.HTTP_200_OK
-            )
-        else:
-            gate_pass.delete()  # Rollback if message fails
-            return Response(
-                {"message": "Gate pass request failed to send WhatsApp message", "notification_status": notification_status, "status": False},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        gate_pass.delete()
+        return Response({"message": "Gate pass request failed to send notification", "status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     except Exception as e:
         return handle_exception(e)
-    
 
 
 
