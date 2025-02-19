@@ -213,9 +213,7 @@ def apply_staff_hostel_gate_pass(request):
             "mailed_to_student": False,
         }, status=status_code)
             
-        
-        org=request.user.organization
-        mailed_to_mentor_success = mailed_to_mentor = send_email(org, subject, message, recipient, cc_emails)
+        mailed_to_mentor_success = mailed_to_mentor = send_email(subject, message, recipient, cc_emails=None)
 
         if mailed_to_mentor == False:
             return Response({
