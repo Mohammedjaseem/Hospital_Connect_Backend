@@ -781,7 +781,9 @@ def build_response(gatepass, current_time, message, action_type, gatepass_code,s
         f'{action_type}_time': current_time,
         'type': action_type
     }, status=status.HTTP_200_OK)
-    
+
+
+
 
 
 @api_view(['GET'])
@@ -801,6 +803,40 @@ def pass_counts_for_mentor(request):
             "rejected_pass": status_counts.get("Rejected", 0),
             "status": True
         }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return handle_exception(e)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_staff_pass(request):
+    try:
+        # Extract parameters from the request
+        staff_id = request.GET.get('profile_id', None)
+        pass_status = request.GET.get('pass_status', 'All')
+        
+        if not staff_id or not pass_status:
+            return Response({
+                "status": False,
+                "message": "Both profile_id and pass_status are required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Filter queryset based on pass_status
+        queryset = HostelStaffGatePass.objects.filter(staff__id=staff_id)
+        
+        if pass_status != "All":
+            queryset = queryset.filter(request_status=pass_status)
+
+        # Serialize the paginated queryset
+        paginated_response = paginate_and_serialize(queryset, request, HostelStaffGatePassSerializer, 2)
+
+        # Return the paginated response
+        return Response({
+            "status": True,
+            "message": "Gate passes retrieved successfully",
+            "data": paginated_response.data
+        }, status=paginated_response.status_code)
 
     except Exception as e:
         return handle_exception(e)
