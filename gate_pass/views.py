@@ -70,11 +70,46 @@ def apply_staff_hostel_gate_pass(request):
             return_date=return_date, return_time=return_time,
             pass_token=f"GatePass-HostelStaff-{uuid.uuid4()}"
         )
-        print(f"✅ Gate pass created: {gate_pass.pass_token}")  # Debug print
 
-        # Sending WhatsApp notification
-        notification_status = send_whatsapp_message(request, passing_data={}, type="Gatepass request", sent_to=mentor_number)
-        print(f"📱 WhatsApp notification status: {notification_status}")  # Debug print
+        # total_seconds = (
+        #             datetime.strptime(f"{return_date} {return_time}", "%Y-%m-%d %H:%M:%S") - 
+        #             datetime.strptime(f"{requesting_date} {requesting_time}", "%Y-%m-%d %H:%M:%S")
+        #         ).total_seconds()
+        
+        # days, remainder = divmod(total_seconds, 86400)
+        # hours, minutes = divmod(remainder, 3600)
+        # minutes //= 60
+        # total_out_duration = f"{int(days)} day{'s' if days > 1 else ''} {int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}" if days else f"{int(hours)} hr{'s' if hours != 1 else ''} {int(minutes)} min{'s' if minutes != 1 else ''}"
+        
+        # check_out_time = datetime.strptime(requesting_time, "%H:%M:%S").strftime("%I:%M %p")
+        # check_in_time = datetime.strptime(return_time, "%H:%M:%S").strftime("%I:%M %p")
+        
+        # whatsapp_data = {
+        #     "messaging_product": "whatsapp", "to": mentor_number, "type": "template",
+        #     "template": {
+        #         "name": "staff_hostel_pass_request", "language": {"code": "en"}, "components": [
+        #             {"type": "header", "parameters": [{"type": "text", "text": "Mims"}]},
+        #             {"type": "body", "parameters": [
+        #                 {"type": "text", "text": staff_profile.name},
+        #                 {"type": "text", "text": staff_profile.department.name},
+        #                 {"type": "text", "text": staff_profile.designation.name},
+        #                 {"type": "text", "text": staff_profile.emp_id},
+        #                 {"type": "text", "text": requesting_date},
+        #                 {"type": "text", "text": check_out_time},
+        #                 {"type": "text", "text": return_date},
+        #                 {"type": "text", "text": check_in_time},
+        #                 {"type": "text", "text": total_out_duration},
+        #                 {"type": "text", "text": purpose},
+        #             ]},
+        #             {"type": "button", "index": "0", "sub_type": "url", "parameters": [{"type": "text", "text": str(gate_pass.pass_token)}]},
+        #             {"type": "button", "index": "1", "sub_type": "url", "parameters": [{"type": "text", "text": str(gate_pass.pass_token)}]},
+        #         ]
+        #     }
+        # }
+        
+        # notification_status = send_whatsapp_message(request, passing_data=whatsapp_data, type="Gatepass request", sent_to=mentor_number)
+
+        # print(f"📱 WhatsApp notification status: {notification_status}")  # Debug print
 
         # Preparing email
         subject = f"{staff_profile.name} Has requested for Gate Pass | ID: #{gate_pass.id}"
@@ -205,7 +240,7 @@ def get_my_pass_list(request):
         gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
 
         # Serialize gate passes with pagination
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 50)
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer,2)
 
         # Extract the paginated data
         paginated_data = paginated_response.data  # Extracting data from the Response object

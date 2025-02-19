@@ -38,14 +38,14 @@ def send_email(self, subject, message, recipient, cc_emails=None):
         print(f"✅ Email successfully sent to {recipient}")  
         logger.info(f"✅ Email successfully sent to {recipient}")
 
-        # ✅ Log successful email sending
-        EmailLog.objects.create(
-            sent_by="Celery Worker",
-            subject=subject,
-            recipient=recipient,
-            cc_emails=cc_emails or "",
-            status="Sent"
-        )
+        # # ✅ Log successful email sending
+        # EmailLog.objects.create(
+        #     sent_by="Celery Worker",
+        #     subject=subject,
+        #     recipient=recipient,
+        #     cc_emails=cc_emails or "",
+        #     status="Sent"
+        # )
 
         return True
 
