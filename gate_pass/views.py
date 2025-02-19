@@ -133,7 +133,7 @@ def apply_staff_hostel_gate_pass(request):
             'pass_token': gate_pass.pass_token,
         })
         
-        mailed_to_mentor = send_email(subject, message, mentor.user.email)
+        mailed_to_mentor = send_email.delay(subject, message, mentor.user.email)
         
         if notification_status:
             return Response({
