@@ -29,6 +29,9 @@ import requests
 from .tasks import send_email
 from django.template.loader import render_to_string
 from django.db import connection
+from datetime import datetime
+
+
             
 
 @api_view(['POST'])
@@ -505,7 +508,7 @@ def HostelStaffGatePassApprove(request, token, decision):
             # }
             
             # # # WhatsApp message to Student parent
-            staff_number = 919567978464
+      
             data = {
                 "messaging_product": "whatsapp",
                 "to": staff_number,  
@@ -535,7 +538,32 @@ def HostelStaffGatePassApprove(request, token, decision):
             
             type = f"Gatepass Approved message to '{gate_pass.staff.name}', Approved by Mentor '{mentor_name}'"
             whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=staff_number)
-            
+            requesting_time = gate_pass.requesting_time.strftime('%I:%M %p')
+            return_time = gate_pass.return_time.strftime('%I:%M %p')
+            # Preparing email
+            subject = f"{gate_pass.staff.name}, Gatepass has been approved | ID: #{gate_pass.id}"
+            message = render_to_string('hostel_pass/PassApproved.html', {
+            'staff_name': gate_pass.staff.name,
+            'check_out': str(gate_pass.requesting_date) + " | " + str(requesting_time),
+            'check_in': str(gate_pass.return_date) + " | " + str(return_time),
+            'mentor': gate_pass.mentor.name,
+            'status': "Approved !",
+            'status_time': datetime.now(),
+            'purpose': gate_pass.purpose,
+            'qr_code_url': gate_pass.qr_code_url,
+            # 'qr_code_url': request.build_absolute_uri(gate_pass.student.picture.url),
+            'org_banner_url' : request.build_absolute_uri(gate_pass.staff.user.org.email_banner.url),
+        })
+
+            # print(f"📩 DEBUG: Sending email to {mentor.user.email}")  # Debug print
+            # print(f"📩 DEBUG: Email Subject - {subject}")  # Debug print
+            # print(f"📩 DEBUG: Email Body - {message}")  # Debug print
+            print("email started")
+            print(f"📩 DEBUG: Email Body - {message}")  # Debug print
+
+            send_email.apply_async(args=[subject, message, gate_pass.staff.user.email])
+            print("✅ Email task triggered successfully") 
+
             if whatsapp_alert_to_staff == True:
                 return Response(
                         {"message": "Gate pass approved successfully", 
@@ -641,6 +669,24 @@ def HostelStaffGatePassApprove(request, token, decision):
             type = f"Gatepass Rejcted message to '{gate_pass.staff.name}', Rejected by Mentor {mentor_name}'"
             sent_to = staff_number
             whatsapp_alert_to_staff = send_whatsapp_message(request, passing_data=data, type=type, sent_to=sent_to)
+
+            # Mail to student
+            print("email started")
+            subject = f"{gate_pass.staff.name} Your Gatepass Request has been Rejected | ID: #{gate_pass.id}"
+            message = render_to_string('hostel_pass/passRejected.html', {
+            'staff_name': gate_pass.staff.name,
+            'check_out': str(gate_pass.requesting_date) + " | " + str(gate_pass.requesting_time),
+            'check_in': str(gate_pass.return_date) + " | " + str(gate_pass.return_time),
+            'mentor': gate_pass.mentor.name,
+            'status': "Rejected !",
+            'status_time': datetime.now(),
+            'purpose': gate_pass.purpose,
+            'reason': reason,
+            'org_banner_url' : request.build_absolute_uri(gate_pass.staff.user.org.email_banner.url),
+            })
+            print(f"📩 DEBUG: Sending email to {gate_pass.staff.user.email}")  # Debug print
+
+            send_email.apply_async(args=[subject, message, gate_pass.staff.user.email])
             
             if whatsapp_alert_to_staff == True:
                 #gatepass to save 
