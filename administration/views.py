@@ -142,7 +142,7 @@ class DesignationApiView(APIView):
         try:
             designation = get_object_or_404(Designations, pk=pk)
             designation.delete()
-            return Response({'message': 'Designation deleted successfully.', 'status': True}, status=status.HTTP_200_OK)
+            return Response({'message': 'Designation  deleted successfully.', 'status': True}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': f"Error deleting designation: {str(e)}", 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
