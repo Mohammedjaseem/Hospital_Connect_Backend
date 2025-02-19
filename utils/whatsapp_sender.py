@@ -29,7 +29,7 @@ def send_whatsapp_message(request, passing_data, type, sent_to):
         # Make the POST request with JSON data
         response = requests.post(graph_api_url, headers=headers, json=data)
         
-
+        print("response: ", response.text)
         if response.status_code == 200:
             try:
                 #updateing the biller function
