@@ -352,6 +352,30 @@ def mentor_approval_pendings(request):
     except Exception as e:
         return handle_exception(e)
         
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def mentor_rejected_gate_passes(request):
+    try:
+        # Get staff profile
+        staff_profile = get_staff_profile(request)
+
+        # Get gate passes for the staff
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Rejected")
+
+        # Serialize gate passes with pagination
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
+
+        # Extract the paginated data
+        paginated_data = paginated_response.data  # Extracting data from the Response object
+
+        return Response({
+            "status": True,
+            "message": "Gate passes retrieved successfully",
+            "data": paginated_data
+        }, status=paginated_response.status_code)  # Maintain the original status code
+
+    except Exception as e:
+        return handle_exception(e)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

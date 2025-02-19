@@ -5,6 +5,8 @@ urlpatterns = [
     path('apply-hostel-staff-gate-pass/', views.apply_staff_hostel_gate_pass, name='apply_staff_gate_pass'),
     path('get_my_pass_list/', views.get_my_pass_list, name="get_my_pass_list"),
     path('mentor_approval_pendings/', views.mentor_approval_pendings, name="mentor_approval_pendings"),
+    path('mentor_rejected_gate_passes/', views.mentor_rejected_gate_passes, name="mentor_rejected_gate_passes"),
+
     path('Hostel_gatepass/<str:token>/<str:decision>/', views.HostelStaffGatePassApprove, name="Hostel_gatepass_approve"),
     path('check_in_check_out_marker/', views.check_in_check_out_marker, name="check_in_check_out_marker"),
     path('gate_pass_report/', views.gate_pass_report, name="gate_pass_report"),
