@@ -86,7 +86,7 @@ def send_otp_to_email(self, to_email, otp, name,org_name):
                     <a href="https://www.linkedin.com/company/connect-v2/posts/?feedView=all"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn"></a>
                     <a href="https://www.instagram.com/connect.v2/"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></a>
                 </div>
-                <p>&copy; 2025 Your Company Name. All rights reserved.</p>
+                <p>&copy; 2025 Edentu Learning Solutions Private Limited. All rights reserved.</p>
                 <p>Need help? Contact us at <a href="mailto:itmanager@edentu.com">itmanager@edentu.com</a></p>
             </div>
         </div>
