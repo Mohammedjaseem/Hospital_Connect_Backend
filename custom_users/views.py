@@ -180,6 +180,7 @@ def login(request):
                 Hostel.objects.filter(incharge=staff_profile).exists()
                 if staff_profile else False
             )
+            is_warden = Hostel.objects.filter(wardens=staff_profile).exists() if staff_profile else False
 
         # Generate JWT tokens
         token = RefreshToken.for_user(user)
@@ -209,6 +210,7 @@ def login(request):
         # Return tokens and user profile data in response body
         if staff_profile_serializer:
             staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
+            staff_profile_serializer['is_warden'] = is_warden
 
         return Response({
             'message': "Login Successful",
@@ -372,6 +374,7 @@ def user_retrival(request):
         staff_profile, student_profile, enrolled_student = None, None, None
         is_profile_created = False
         is_hostel_incharge = False
+        is_warden = False
 
         # Handle tenant-specific data
         with schema_context(user.org.client.schema_name):  # Switch to tenant schema
@@ -382,6 +385,7 @@ def user_retrival(request):
                 Hostel.objects.filter(incharge=staff_profile).exists()
                 if staff_profile else False
             )
+            is_warden = Hostel.objects.filter(wardens=staff_profile).exists() if staff_profile else False
 
         # Serialize user details
         user_serializer = CustomUserSerializer(user)
@@ -406,6 +410,7 @@ def user_retrival(request):
         # Return response
         if staff_profile_serializer:
             staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
+            staff_profile_serializer['is_warden'] = is_warden
         return Response({
             'message': "User retrieved successfully",
             'is_profile_created': is_profile_created,
