@@ -23,6 +23,7 @@ from utils.paginator import paginate_and_serialize
 import pyqrcode
 from PIL import Image
 import io
+from collections import Counter
 import requests
 
 
@@ -338,7 +339,7 @@ def mentor_approval_pendings(request):
         gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, mentor_updated=None)
 
         # Serialize gate passes with pagination
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
 
         # Extract the paginated data
         paginated_data = paginated_response.data  # Extracting data from the Response object
@@ -363,7 +364,7 @@ def mentor_rejected_gate_passes(request):
         gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Rejected")
 
         # Serialize gate passes with pagination
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
 
         # Extract the paginated data
         paginated_data = paginated_response.data  # Extracting data from the Response object
@@ -388,7 +389,7 @@ def mentor_approved_gate_passes(request):
         gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Approved")
 
         # Serialize gate passes with pagination
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 70)
+        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
 
         # Extract the paginated data
         paginated_data = paginated_response.data  # Extracting data from the Response object
@@ -777,3 +778,26 @@ def build_response(gatepass, current_time, message, action_type, gatepass_code,s
         f'{action_type}_time': current_time,
         'type': action_type
     }, status=status.HTTP_200_OK)
+    
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def pass_counts_for_mentor(request):
+    try:
+        staff_profile = get_staff_profile(request)
+        status_counts = Counter(
+            HostelStaffGatePass.objects.filter(mentor=staff_profile)
+            .values_list("request_status", flat=True)
+        )
+
+        return Response({
+            "total_gatepasses": sum(status_counts.values()),
+            "approval_pending": status_counts.get("Requested", 0),
+            "approved_pass": status_counts.get("Approved", 0),
+            "rejected_pass": status_counts.get("Rejected", 0),
+            "status": True
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return handle_exception(e)
