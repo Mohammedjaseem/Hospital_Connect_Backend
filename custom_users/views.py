@@ -209,7 +209,7 @@ def login(request):
         # Return tokens and user profile data in response body
         if staff_profile_serializer:
             staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
-        user.name = request.data.get('name')
+
         return Response({
             'message': "Login Successful",
             'status': True,
