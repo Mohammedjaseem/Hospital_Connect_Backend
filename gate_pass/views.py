@@ -26,7 +26,7 @@ import io
 from collections import Counter
 import requests
 # from utils.send_email import send_email
-from tasks import send_email
+from .tasks import send_email
 from django.template.loader import render_to_string
 from django.db import connection
             
