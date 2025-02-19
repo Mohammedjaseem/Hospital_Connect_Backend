@@ -24,7 +24,7 @@ class StaffProfilePagination(PageNumberPagination):
 class StaffProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @verify_tenant_user(is_hospital_admin=True)
+    @verify_tenant_user(is_hospital_admin=False)
     def get(self, request, pk=None):
         try:
             if pk:
