@@ -781,7 +781,7 @@ def build_response(gatepass, current_time, message, action_type, gatepass_code,s
     
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def pass_counts_for_mentor(request):
     try:
