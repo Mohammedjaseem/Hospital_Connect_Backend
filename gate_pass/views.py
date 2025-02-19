@@ -47,9 +47,8 @@ def apply_staff_hostel_gate_pass(request):
 
         if latest_gate_pass:
             time_left = latest_gate_pass.requested_on + timedelta(hours=5) - timezone.now()
-            local_time_left = time_left.astimezone(timezone.get_current_timezone())
             return Response(
-                {"message": f"You have already requested a gate pass. Try again after {int(local_time_left.total_seconds() // 3600):02}:{int((local_time_left.total_seconds() % 3600) // 60):02}.", "status": False},
+                {"message": f"You have already requested a gate pass. Try again after {int(time_left.total_seconds() // 3600):02}:{int((time_left.total_seconds() % 3600) // 60):02}.", "status": False},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
