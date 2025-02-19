@@ -242,7 +242,7 @@ def get_my_pass_list(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile)
+        gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
 
         # Serialize gate passes with pagination
         paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer,2)
