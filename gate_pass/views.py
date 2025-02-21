@@ -295,7 +295,7 @@ def mentor_approval_pendings(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, mentor_updated=None)
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, mentor_updated=None).order_by('-requested_on')
 
         # Serialize gate passes with pagination
         paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
@@ -320,7 +320,7 @@ def mentor_rejected_gate_passes(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Rejected")
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Rejected").order_by('-requested_on')
 
         # Serialize gate passes with pagination
         paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
@@ -345,7 +345,7 @@ def mentor_approved_gate_passes(request):
         staff_profile = get_staff_profile(request)
 
         # Get gate passes for the staff
-        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Approved")
+        gatepasses = HostelStaffGatePass.objects.filter(mentor=staff_profile, request_status="Approved").order_by('-requested_on')
 
         # Serialize gate passes with pagination
         paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 2)
