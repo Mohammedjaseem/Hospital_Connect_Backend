@@ -128,10 +128,10 @@ def apply_staff_hostel_gate_pass(request):
             'staff_req_time': requesting_time,
             'retrun_date': return_date,
             'retrun_time': return_time,
-            'total_out_duration': "Some duration here",
+            'total_out_duration': total_out_duration,
             'purpose': purpose,
             'pass_token': gate_pass.pass_token,
-            'org_banner_url' :  request.build_absolute_uri(gate_pass.staff.user.org.email_banner.url),
+            'org_banner_url' : request.build_absolute_uri(gate_pass.staff.user.org.email_banner.url),
         })
 
         # print(f"📩 DEBUG: Sending email to {mentor.user.email}")  # Debug print
