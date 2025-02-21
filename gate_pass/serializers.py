@@ -39,6 +39,7 @@ class HostelStaffGatePassSerializer(serializers.ModelSerializer):
             "checked_in",
             "date_time_entry",
             "duration",
+            'hostel_name',
         ]
         
     def get_staff_picture(self, obj):
