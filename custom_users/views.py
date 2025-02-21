@@ -375,6 +375,7 @@ def user_retrival(request):
         is_profile_created = False
         is_hostel_incharge = False
         is_warden = False
+        hostel_name = None
 
         # Handle tenant-specific data
         with schema_context(user.org.client.schema_name):  # Switch to tenant schema
@@ -386,6 +387,7 @@ def user_retrival(request):
                 if staff_profile else False
             )
             is_warden = Hostel.objects.filter(wardens=staff_profile).exists() if staff_profile else False
+            hostel_name = staff_profile.hostel.name if staff_profile and staff_profile.hostel else None
 
         # Serialize user details
         user_serializer = CustomUserSerializer(user)
@@ -411,6 +413,7 @@ def user_retrival(request):
         if staff_profile_serializer:
             staff_profile_serializer['is_hostel_incharge'] = is_hostel_incharge
             staff_profile_serializer['is_warden'] = is_warden
+            staff_profile_serializer['hostel_name'] = hostel_name
         return Response({
             'message': "User retrieved successfully",
             'is_profile_created': is_profile_created,
