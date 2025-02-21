@@ -4,7 +4,7 @@ from .models import HostelStaffGatePass
 class HostelStaffGatePassSerializer(serializers.ModelSerializer):
     staff_name = serializers.CharField(source="staff.name", read_only=True)
     mentor_name = serializers.CharField(source="mentor.name", read_only=True)
-    
+    hostel_name = serializers.CharField(source="staff.hostel.name", read_only=True)
     staff_department = serializers.CharField(source="staff.department.name", read_only=True)
     staff_designation = serializers.CharField(source="staff.designation.name", read_only=True)
     staff_picture = serializers.SerializerMethodField()
