@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('apply-hostel-staff-gate-pass/', views.apply_staff_hostel_gate_pass, name='apply_staff_gate_pass'),
-    path('get_my_pass_list/', views.get_my_pass_list, name="get_my_pass_list"),
+    path('get_pass_list/', views.get_my_pass_list, name="get_my_pass_list"),
     path('mentor_approval_pendings/', views.mentor_approval_pendings, name="mentor_approval_pendings"),
     path('mentor_rejected_gate_passes/', views.mentor_rejected_gate_passes, name="mentor_rejected_gate_passes"),
     path('mentor_approved_gate_passes/', views.mentor_approved_gate_passes, name="mentor_approved_gate_passes"),
