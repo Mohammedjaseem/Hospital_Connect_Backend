@@ -238,10 +238,17 @@ def gate_pass_report(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_my_pass_list(request):
     try:
-        # Retrieve staff profile; adjust the exception as needed
+        # Ensure the user is authenticated (this is extra safety, as IsAuthenticated should handle it)
+        if not request.user.is_authenticated:
+            return Response({
+                "status": False,
+                "message": "Authentication credentials were not provided."
+            }, status=status.HTTP_401_UNAUTHORIZED)
+ 
+        # Retrieve the staff profile for the authenticated user
         staff_profile = get_staff_profile(request)
     except StaffProfile.DoesNotExist:
         return Response({
@@ -251,7 +258,7 @@ def get_my_pass_list(request):
     except Exception as e:
         # logger.exception("Error retrieving staff profile: %s", e)
         return handle_exception(e)
-
+ 
     try:
         # Get gate passes for the staff and paginate the results
         gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
@@ -259,7 +266,7 @@ def get_my_pass_list(request):
     except Exception as e:
         # logger.exception("Error retrieving gate passes: %s", e)
         return handle_exception(e)
-
+ 
     return Response({
         "status": True,
         "message": "Gate passes retrieved successfully.",
