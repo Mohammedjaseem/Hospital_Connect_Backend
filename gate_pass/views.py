@@ -31,6 +31,10 @@ from django.template.loader import render_to_string
 from django.db import connection
 from datetime import datetime
 from staff.models import StaffProfile
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 
             
@@ -237,41 +241,42 @@ def gate_pass_report(request):
 
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_my_pass_list(request):
-    try:
-        # Ensure the user is authenticated (this is extra safety, as IsAuthenticated should handle it)
-        if not request.user.is_authenticated:
+class GetPassListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Although IsAuthenticated is used, we check again for extra safety
+            if not request.user.is_authenticated:
+                return Response({
+                    "status": False,
+                    "message": "Authentication credentials were not provided."
+                }, status=status.HTTP_401_UNAUTHORIZED)
+
+            # Retrieve the staff profile for the authenticated user
+            staff_profile = get_staff_profile(request)
+        except StaffProfile.DoesNotExist:
             return Response({
                 "status": False,
-                "message": "Authentication credentials were not provided."
-            }, status=status.HTTP_401_UNAUTHORIZED)
- 
-        # Retrieve the staff profile for the authenticated user
-        staff_profile = get_staff_profile(request)
-    except StaffProfile.DoesNotExist:
+                "message": "Staff profile not found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            # logger.exception("Error retrieving staff profile: %s", e)
+            return handle_exception(e)
+
+        try:
+            # Get gate passes for the staff and paginate the results
+            gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
+            paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 15)
+        except Exception as e:
+            # logger.exception("Error retrieving gate passes: %s", e)
+            return handle_exception(e)
+
         return Response({
-            "status": False,
-            "message": "Staff profile not found."
-        }, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        # logger.exception("Error retrieving staff profile: %s", e)
-        return handle_exception(e)
- 
-    try:
-        # Get gate passes for the staff and paginate the results
-        gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
-        paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 15)
-    except Exception as e:
-        # logger.exception("Error retrieving gate passes: %s", e)
-        return handle_exception(e)
- 
-    return Response({
-        "status": True,
-        "message": "Gate passes retrieved successfully.",
-        "data": paginated_response.data
-    }, status=paginated_response.status_code)
+            "status": True,
+            "message": "Gate passes retrieved successfully.",
+            "data": paginated_response.data
+        }, status=paginated_response.status_code)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def single_pass_data(request):
