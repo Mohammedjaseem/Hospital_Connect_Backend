@@ -239,9 +239,9 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 # # Settinngs for the HttpOnly Jwt Cookie
 
 # CSRF_COOKIE_HTTPONLY = False # ✅ Allow CSRF cookie to be accessed by JavaScript
-CSRF_COOKIE_SECURE = True  # ✅ Ensure CSRF cookie works in local development
+# CSRF_COOKIE_SECURE = True  # ✅ Ensure CSRF cookie works in local development
 # CSRF_USE_SESSIONS = False
-CSRF_COOKIE_SAMESITE = "None"  # ✅ Match AUTH_COOKIE_SAMESITE
+# CSRF_COOKIE_SAMESITE = "None"  # ✅ Match AUTH_COOKIE_SAMESITE
 # CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]  # ✅ Trusted frontend origin
 
 
@@ -258,8 +258,8 @@ CSRF_TRUSTED_ORIGINS = ["http://localhost:5173","https://am-connect.vercel.app" 
 
 
 # SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True  # ✅ Match AUTH_COOKIE_SECURE
-SESSION_COOKIE_SAMESITE = "None"  # ✅ Match CSRF and AUTH_COOKIE_SAMESITE
+# SESSION_COOKIE_SECURE = True  # ✅ Match AUTH_COOKIE_SECURE
+# SESSION_COOKIE_SAMESITE = "None"  # ✅ Match CSRF and AUTH_COOKIE_SAMESITE
 
 # # Ensure authentication cookies are also secure
 # AUTH_COOKIE_HTTPONLY = True
