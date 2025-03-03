@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -320,13 +320,13 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',  # Change DEBUG to INFO
             'class': 'logging.FileHandler',
-            'filename': '/var/log/hospital_connect_api.log',  # Server log file
+            'filename': '/var/log/hospital_connect_api.log',
             'formatter': 'verbose',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',  # Change DEBUG to INFO
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
@@ -334,12 +334,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',  # Change DEBUG to INFO
             'propagate': True,
         },
-        'hospital_connect': {  # Custom logger for hospital API
+        'django.db.backends': {  # Disable SQL query logs
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',  # Set to WARNING to suppress query logs
             'propagate': False,
         },
     },
