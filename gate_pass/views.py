@@ -33,6 +33,7 @@ from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from staff.models import StaffProfile
+import logging
 
 
             
@@ -161,6 +162,7 @@ def apply_staff_hostel_gate_pass(request):
 @permission_classes([IsAuthenticated])  # Secure API access
 def gate_pass_report(request):
     try:
+        print("🚀 API called: gate_pass_report")  # Debug print
         # Get all approved gate passes
         gatepasses = HostelStaffGatePass.objects.filter(request_status="Approved")
 
@@ -238,35 +240,42 @@ def gate_pass_report(request):
         return handle_exception(e)
 
 
+logger = logging.getLogger(__name__)
+
 class GetPassListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        logger.info(f"🚀 API called: GetPassListView | User: {request.user}")
+
         try:
-            # Although IsAuthenticated is used, we check again for extra safety
+            # Extra authentication check
             if not request.user.is_authenticated:
+                logger.warning("❌ User is not authenticated")
                 return Response({
                     "status": False,
                     "message": "Authentication credentials were not provided."
                 }, status=status.HTTP_401_UNAUTHORIZED)
 
-            # Retrieve the staff profile for the authenticated user
+            # Retrieve staff profile
             staff_profile = get_staff_profile(request)
         except StaffProfile.DoesNotExist:
+            logger.error("❌ Staff profile not found for user")
             return Response({
                 "status": False,
                 "message": "Staff profile not found."
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            # logger.exception("Error retrieving staff profile: %s", e)
+            logger.exception("❌ Error retrieving staff profile")
             return handle_exception(e)
 
         try:
-            # Get gate passes for the staff and paginate the results
+            # Get gate passes for staff and paginate results
             gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
             paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 15)
+            logger.info("✅ Gate passes retrieved successfully")
         except Exception as e:
-            # logger.exception("Error retrieving gate passes: %s", e)
+            logger.exception(f"❌ Error retrieving gate passes: {e}")
             return handle_exception(e)
 
         return Response({
@@ -274,44 +283,43 @@ class GetPassListView(APIView):
             "message": "Gate passes retrieved successfully.",
             "data": paginated_response.data
         }, status=paginated_response.status_code)
-    
 
-class GetPassListView(APIView):
-    permission_classes = [IsAuthenticated]
+# class GetPassListView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            # Although IsAuthenticated is used, we check again for extra safety
-            if not request.user.is_authenticated:
-                return Response({
-                    "status": False,
-                    "message": "Authentication credentials were not provided."
-                }, status=status.HTTP_401_UNAUTHORIZED)
+#     def get(self, request):
+#         try:
+#             # Although IsAuthenticated is used, we check again for extra safety
+#             if not request.user.is_authenticated:
+#                 return Response({
+#                     "status": False,
+#                     "message": "Authentication credentials were not provided."
+#                 }, status=status.HTTP_401_UNAUTHORIZED)
 
-            # Retrieve the staff profile for the authenticated user
-            staff_profile = get_staff_profile(request)
-        except StaffProfile.DoesNotExist:
-            return Response({
-                "status": False,
-                "message": "Staff profile not found."
-            }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            # logger.exception("Error retrieving staff profile: %s", e)
-            return handle_exception(e)
+#             # Retrieve the staff profile for the authenticated user
+#             staff_profile = get_staff_profile(request)
+#         except StaffProfile.DoesNotExist:
+#             return Response({
+#                 "status": False,
+#                 "message": "Staff profile not found."
+#             }, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             # logger.exception("Error retrieving staff profile: %s", e)
+#             return handle_exception(e)
 
-        try:
-            # Get gate passes for the staff and paginate the results
-            gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
-            paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 15)
-        except Exception as e:
-            # logger.exception("Error retrieving gate passes: %s", e)
-            return handle_exception(e)
+#         try:
+#             # Get gate passes for the staff and paginate the results
+#             gatepasses = HostelStaffGatePass.objects.filter(staff=staff_profile).order_by('-requested_on')
+#             paginated_response = paginate_and_serialize(gatepasses, request, HostelStaffGatePassSerializer, 15)
+#         except Exception as e:
+#             # logger.exception("Error retrieving gate passes: %s", e)
+#             return handle_exception(e)
 
-        return Response({
-            "status": True,
-            "message": "Gate passes retrieved successfully.",
-            "data": paginated_response.data
-        }, status=paginated_response.status_code)
+#         return Response({
+#             "status": True,
+#             "message": "Gate passes retrieved successfully.",
+#             "data": paginated_response.data
+#         }, status=paginated_response.status_code)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def single_pass_data(request):

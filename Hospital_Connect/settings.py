@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
+import logging
 
 
 load_dotenv()
@@ -247,10 +248,10 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # ✅ Frontend running locally
-    "https://am-connect.vercel.app",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  # ✅ Frontend running locally
+#     "https://am-connect.vercel.app",
+# ]
 
 
 
@@ -297,47 +298,49 @@ MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
 
 
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (Only for testing)
+CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+# CORS_ALLOW_HEADERS = ["Authorization", "Content-Type"]
 
 
-
-import logging
 
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "debug.log",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} | {asctime} | {module} | {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} | {message}',
+            'style': '{',
         },
     },
-    "loggers": {
-        "django": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-            "propagate": True,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/hospital_connect_api.log',  # Server log file
+            'formatter': 'verbose',
         },
-        "storages": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-            "propagate": False,
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
-        "boto3": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-            "propagate": False,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
-        "botocore": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-            "propagate": False,
+        'hospital_connect': {  # Custom logger for hospital API
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
-
-
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (Only for testing)
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-CORS_ALLOW_HEADERS = ["Authorization", "Content-Type"]
