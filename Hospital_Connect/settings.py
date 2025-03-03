@@ -303,43 +303,26 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_HEADERS = ["Authorization", "Content-Type"]
 
 
-
+# Logging Configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} | {asctime} | {module} | {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} | {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/hospital_connect_api.log',  # Server log file
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'filename': 'debug.log',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'hospital_connect': {  # Custom logger for hospital API
-            'handlers': ['file', 'console'],
+        '__main__': {
+            'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': False,
         },
     },
 }
