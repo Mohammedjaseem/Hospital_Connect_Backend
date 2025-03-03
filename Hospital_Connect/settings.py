@@ -14,7 +14,6 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
-import logging
 
 
 load_dotenv()
@@ -30,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -320,13 +319,13 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',  # Change DEBUG to INFO
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/hospital_connect_api.log',
+            'filename': '/var/log/hospital_connect_api.log',  # Server log file
             'formatter': 'verbose',
         },
         'console': {
-            'level': 'INFO',  # Change DEBUG to INFO
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
@@ -334,12 +333,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',  # Change DEBUG to INFO
+            'level': 'DEBUG',
             'propagate': True,
         },
-        'django.db.backends': {  # Disable SQL query logs
+        'hospital_connect': {  # Custom logger for hospital API
             'handlers': ['file', 'console'],
-            'level': 'WARNING',  # Set to WARNING to suppress query logs
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
