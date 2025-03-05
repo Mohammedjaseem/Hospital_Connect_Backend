@@ -320,13 +320,8 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        '__main__': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-        },
     },
 }
-
 
 import logging
 
