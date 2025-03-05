@@ -304,6 +304,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # Logging Configuration
+import os
+import logging
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -311,11 +314,11 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': 'application.log',
         },
     },
     'loggers': {
-        'django': {
+        '': {  # Root logger
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,

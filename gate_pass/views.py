@@ -240,12 +240,18 @@ def gate_pass_report(request):
         return handle_exception(e)
 
 
+import logging
+
 logger = logging.getLogger(__name__)
 
 class GetPassListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
+        with open('debug_prints.log', 'a') as f:
+            print("request",request, file=f)
+            f.flush()
         logger.info(f"🚀 API called: GetPassListView | User: {request.user}")
 
         try:
