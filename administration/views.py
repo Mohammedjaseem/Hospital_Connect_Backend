@@ -180,11 +180,16 @@ class VerifyStaffApiView(APIView):
         except Exception as e:
             return Response({'error': f"Error unverifying staff: {str(e)}", 'status': False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AdminDashboardAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTenantUser, IsHospitalAdmin]
 
     def get(self, request):
+        for header, value in request.headers.items():
+            logger.info(f"{header}: {value}")
         try:
             # Total staff count
             total_staff = StaffProfile.objects.count()
