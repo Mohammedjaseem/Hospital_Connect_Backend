@@ -245,7 +245,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 class GetPassListView(APIView):
+    logger.info("🚀 API called: GetPassListView")  # Debug print
     permission_classes = [IsAuthenticated]
+    logger.info("🚀 API called: unauthorized")  # Debug print
 
     def get(self, request):
 
