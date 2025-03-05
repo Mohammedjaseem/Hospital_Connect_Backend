@@ -246,12 +246,14 @@ logger = logging.getLogger(__name__)
 
 class GetPassListView(APIView):
     logger.info("🚀 API called: GetPassListView")  # Debug print
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     logger.info("🚀 API called: unauthorized")  # Debug print
 
     def get(self, request):
         logger.info("🚀 API called: GetPassListView | User: {request}")  # Debug print
-
+        logger.info("🚀 Request Headers:")
+        for header, value in request.headers.items():
+            logger.info(f"{header}: {value}")
         with open('debug_prints.log', 'a') as f:
             print("request",request, file=f)
             f.flush()
