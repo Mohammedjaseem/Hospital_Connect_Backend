@@ -258,6 +258,7 @@ class GetPassListView(APIView):
             # Extra authentication check
             if not request.user.is_authenticated:
                 logger.warning("❌ User is not authenticated")
+                print("❌ User is not authenticated")
                 return Response({
                     "status": False,
                     "message": "Authentication credentials were not provided."
@@ -267,12 +268,14 @@ class GetPassListView(APIView):
             staff_profile = get_staff_profile(request)
         except StaffProfile.DoesNotExist:
             logger.error("❌ Staff profile not found for user")
+            print("❌ Staff profile not found for user")
             return Response({
                 "status": False,
                 "message": "Staff profile not found."
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.exception("❌ Error retrieving staff profile")
+            print("❌ Error retrieving staff profile")
             return handle_exception(e)
 
         try:
