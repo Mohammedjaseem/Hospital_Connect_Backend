@@ -792,6 +792,8 @@ def HostelStaffGatePassApprove(request, token, decision):
 
 @api_view(['GET'])
 def check_in_check_out_marker(request):
+    for header, value in request.headers.items():
+            logger.info(f"{header}: {value}")
     gatepass_code = request.GET.get('unique_id', None)
     if not gatepass_code:
         return JsonResponse({'status': False, 'message': 'Gatepass Uniquecode is required'}, status=status.HTTP_400_BAD_REQUEST)
