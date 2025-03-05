@@ -250,7 +250,7 @@ class GetPassListView(APIView):
     logger.info("🚀 API called: unauthorized")  # Debug print
 
     def get(self, request):
-        print(request)  # Debug print
+        logger.info("🚀 API called: GetPassListView | User: {request}")  # Debug print
 
         with open('debug_prints.log', 'a') as f:
             print("request",request, file=f)
