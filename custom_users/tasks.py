@@ -109,15 +109,21 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
             </p>
             <p style=\"margin: 0; margin-top: 8px; color: #434343;\">Edappal Kerala.</p>
             <div style="margin: 0; margin-top: 16px;">
-            <a href="https://www.instagram.com/yourpage" target="_blank" style="display: inline-block;">
-              <img width="36px" alt="Instagram"
-                src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661504218208_684135/email-template-icon-instagram" />
-            </a>
-            <a href="https://www.linkedin.com/in/yourprofile" target="_blank" style="display: inline-block; margin-left: 8px;">
-              <img width="36px" alt="LinkedIn"
-                src="https://cdn-icons-png.flaticon.com/512/174/174857.png" />
-            </a>
+             <a href="https://connect.edentu.com/" target="_blank" style="display: inline-block; margin-left: 8px;">
+                <img width="36px" alt="Website"
+                  src="https://cdn-icons-png.flaticon.com/512/1006/1006771.png" />
+              </a>
+              <a href="https://www.instagram.com/connect.v2/" target="_blank" style="display: inline-block;">
+                <img width="36px" alt="Instagram"
+                  src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661504218208_684135/email-template-icon-instagram" />
+              </a>
+              <a href="https://www.linkedin.com/company/connect-v2/posts/?feedView=all" target="_blank" style="display: inline-block; margin-left: 8px;">
+                <img width="36px" alt="LinkedIn"
+                  src="https://cdn-icons-png.flaticon.com/512/174/174857.png" />
+              </a>
+             
             </div>
+
             <p style=\"margin: 0; margin-top: 16px; color: #434343;\">
               Copyright © 2025. All rights reserved.
             </p>
