@@ -158,7 +158,7 @@ def login(request):
             otp_instance = OTP.objects.create(user=user)
             otp_instance.set_otp(str(otp))
             otp_instance.save()
-            send_otp_to_email.delay(user.email, otp, user.name, user.org.name,source="reset your password")  # Send OTP using Celery
+            send_otp_to_email.delay(user.email, otp, user.name, user.org.name,source="verify your email address")  # Send OTP using Celery
             return Response({
                 'message': 'User is not verified. Please verify your OTP.',
                 'uuid': user.uuid,
@@ -317,7 +317,7 @@ def forgot_password(request):
         otp_instance = OTP.objects.create(user=user)
         otp_instance.set_otp(str(otp))
         otp_instance.save()
-        send_otp_to_email.delay(user.email, otp,user.name, user.org.name)  # Send OTP to user's email using celery
+        send_otp_to_email.delay(user.email, otp,user.name, user.org.name,source="reset your password")  # Send OTP to user's email using celery
         return Response({'message': 'OTP sent successfully','uuid':user.uuid,'status': True}, status=status.HTTP_200_OK)
     except Exception as e:
         logger.error(f"Error during forgot password process: {e}")
