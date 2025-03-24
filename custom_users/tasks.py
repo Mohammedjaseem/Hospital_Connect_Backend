@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task(bind=True)
-def send_otp_to_email(self, to_email, otp, name, org_name):
+def send_otp_to_email(self, to_email, otp, name, org_name,source):
     mail_subject = f"OTP Code from {org_name} Connect"
     current_date = datetime.now().strftime("%B %d, %Y")
 
@@ -61,13 +61,13 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
             >
               <div style=\"width: 100%; max-width: 489px; margin: 0 auto;\">
                 <h1 style=\"margin: 0; font-size: 24px; font-weight: 500; color: #1f1f1f;\">
-                  Connect Register OTP
+                  Connect OTP
                 </h1>
 
                 <p style=\"margin: 0; margin-top: 5px; font-weight: 500; letter-spacing: 0.56px;\">
                   Hello, <b>{name}</b><br><br>
                   Thank you for choosing <b>{org_name} Connect</b>.<br><br>
-                  Use the following OTP to verify your email address.<br>
+                  Use the following OTP to {source}.<br>
                   OTP is valid for <span style=\"font-weight: 600; color: #1f1f1f;\">10 minutes</span>.<br><br>
                 </p>
 
