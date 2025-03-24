@@ -51,3 +51,15 @@ def update_hostel(request, hostel_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# ✅ Delete Hostel
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_hostel(request, hostel_id):
+    try:
+        hostel = Hostel.objects.get(id=hostel_id)
+        hostel.delete()
+        return Response({"message": "Hostel deleted successfully","status":True}, status=status.HTTP_202_ACCEPTED)
+    except Hostel.DoesNotExist:
+        return Response({"error": "Hostel not found"}, status=status.HTTP_404_NOT_FOUND)
+    
