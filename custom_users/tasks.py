@@ -68,7 +68,7 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
                   Hello, <b>{name}</b><br><br>
                   Thank you for choosing <b>{org_name}</b>.<br><br>
                   Use the following OTP to verify your email address.<br>
-                  OTP is valid for <span style=\"font-weight: 600; color: #1f1f1f;\">5 minutes</span>.<br><br>
+                  OTP is valid for <span style=\"font-weight: 600; color: #1f1f1f;\">10 minutes</span>.<br><br>
                 </p>
 
                 <p
