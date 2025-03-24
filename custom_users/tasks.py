@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True)
 def send_otp_to_email(self, to_email, otp, name,org_name):
-    mail_subject = "OTP Code from Connect School"
+    mail_subject = f"OTP Code from {org_name} Connect "
 
     # HTML content for the email
     html_content = f"""
