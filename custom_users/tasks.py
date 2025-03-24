@@ -66,7 +66,7 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
 
                 <p style=\"margin: 0; margin-top: 5px; font-weight: 500; letter-spacing: 0.56px;\">
                   Hello, <b>{name}</b><br><br>
-                  Thank you for choosing <b>{org_name}</b>.<br><br>
+                  Thank you for choosing <b>{org_name} Connect</b>.<br><br>
                   Use the following OTP to verify your email address.<br>
                   OTP is valid for <span style=\"font-weight: 600; color: #1f1f1f;\">10 minutes</span>.<br><br>
                 </p>
@@ -79,8 +79,12 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
                 </p>
 
                 <p style=\"margin: 0; margin-top: 15px; font-weight: 500; letter-spacing: 0.56px;\">
-                  Do not share this code with others, including Connect employees.
+                  Do not share this code with others.
                 </p>
+                <p style=\"margin: 0; margin-top: 15px; font-weight: 500; letter-spacing: 0.56px;\">
+                  If you didn't request this, please ignore this email.
+                </p>
+
               </div>
             </div>
 
@@ -101,26 +105,18 @@ def send_otp_to_email(self, to_email, otp, name, org_name):
               border-top: 1px solid #e6ebf1;\"
           >
             <p style=\"margin: 0; margin-top: 40px; font-size: 16px; font-weight: 600; color: #434343;\">
-              Connect V2 by {org_name}.
+            {org_name} Connect by Connect.
             </p>
             <p style=\"margin: 0; margin-top: 8px; color: #434343;\">Edappal Kerala.</p>
-            <div style=\"margin: 0; margin-top: 16px;\">
-              <a href=\"\" target=\"_blank\" style=\"display: inline-block;\">
-                <img width=\"36px\" alt=\"Facebook\"
-                  src=\"https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661502815169_682499/email-template-icon-facebook\" />
-              </a>
-              <a href=\"\" target=\"_blank\" style=\"display: inline-block; margin-left: 8px;\">
-                <img width=\"36px\" alt=\"Instagram\"
-                  src=\"https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661504218208_684135/email-template-icon-instagram\" />
-              </a>
-              <a href=\"\" target=\"_blank\" style=\"display: inline-block; margin-left: 8px;\">
-                <img width=\"36px\" alt=\"Twitter\"
-                  src=\"https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661503043040_372004/email-template-icon-twitter\" />
-              </a>
-              <a href=\"\" target=\"_blank\" style=\"display: inline-block; margin-left: 8px;\">
-                <img width=\"36px\" alt=\"Youtube\"
-                  src=\"https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661503195931_210869/email-template-icon-youtube\" />
-              </a>
+            <div style="margin: 0; margin-top: 16px;">
+            <a href="https://www.instagram.com/yourpage" target="_blank" style="display: inline-block;">
+              <img width="36px" alt="Instagram"
+                src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661504218208_684135/email-template-icon-instagram" />
+            </a>
+            <a href="https://www.linkedin.com/in/yourprofile" target="_blank" style="display: inline-block; margin-left: 8px;">
+              <img width="36px" alt="LinkedIn"
+                src="https://cdn-icons-png.flaticon.com/512/174/174857.png" />
+            </a>
             </div>
             <p style=\"margin: 0; margin-top: 16px; color: #434343;\">
               Copyright © 2025. All rights reserved.
