@@ -109,6 +109,7 @@ def resend_otp(request):
     
     uuid = request.data.get('uuid')
     org = request.data.get('org')
+    source = request.data.get('source')  # Source can be either 'register' or 'forgot_password'
 
     try:
         org_instance = Organizations.objects.get(pk=org)
@@ -118,7 +119,7 @@ def resend_otp(request):
         otp_instance = OTP(user=user)
         otp_instance.set_otp(str(otp))
         otp_instance.save()
-        send_otp_to_email.delay(user.email, otp,user.name,org_instance.name,source="verify your email address")  # Send new OTP to user's email using celery
+        send_otp_to_email.delay(user.email, otp,user.name,org_instance.name,source=source)  # Send new OTP to user's email using celery
 
         return Response({'message': 'New OTP sent successfully', 'status': True}, status=status.HTTP_200_OK)
     except Exception as e:
