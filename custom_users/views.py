@@ -56,7 +56,7 @@ def register_user(request):
             serializer.is_valid(raise_exception=True)
             user, otp = serializer.save()
             print("otp : ",otp)
-            send_otp_to_email.delay(user.email, otp,name,org_instance.name,source="verify your email addres")  # Send OTP to user's email using Celery
+            send_otp_to_email.delay(user.email, otp,name,org_instance.name,source="verify your email address")  # Send OTP to user's email using Celery
         return Response({'message': 'User created successfully', 'uuid': user.uuid, 'status': True}, status=status.HTTP_201_CREATED)
     except Exception as e:
         logger.error(f"Error during user registration: {e}")
@@ -118,7 +118,7 @@ def resend_otp(request):
         otp_instance = OTP(user=user)
         otp_instance.set_otp(str(otp))
         otp_instance.save()
-        send_otp_to_email.delay(user.email, otp,user.name,org_instance.name,source="reset your password")  # Send new OTP to user's email using celery
+        send_otp_to_email.delay(user.email, otp,user.name,org_instance.name,source="verify your email address")  # Send new OTP to user's email using celery
 
         return Response({'message': 'New OTP sent successfully', 'status': True}, status=status.HTTP_200_OK)
     except Exception as e:
@@ -158,7 +158,7 @@ def login(request):
             otp_instance = OTP.objects.create(user=user)
             otp_instance.set_otp(str(otp))
             otp_instance.save()
-            send_otp_to_email.delay(user.email, otp, user.name, user.org.name)  # Send OTP using Celery
+            send_otp_to_email.delay(user.email, otp, user.name, user.org.name,source="reset your password")  # Send OTP using Celery
             return Response({
                 'message': 'User is not verified. Please verify your OTP.',
                 'uuid': user.uuid,
